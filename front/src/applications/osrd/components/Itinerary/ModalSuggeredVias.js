@@ -2,11 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { FaLongArrowAltUp, FaLongArrowAltDown, FaTrash } from 'react-icons/fa';
+import nextId from 'react-id-generator';
+
 import ModalSNCF from 'common/BootstrapSNCF/ModalSNCF/ModalSNCF';
 import ModalHeaderSNCF from 'common/BootstrapSNCF/ModalSNCF/ModalHeaderSNCF';
 import ModalBodySNCF from 'common/BootstrapSNCF/ModalSNCF/ModalBodySNCF';
 import ModalFooterSNCF from 'common/BootstrapSNCF/ModalSNCF/ModalFooterSNCF';
-import { FaLongArrowAltUp, FaLongArrowAltDown, FaTrash } from 'react-icons/fa';
 
 function LoaderPathfindingInProgress() {
   return (
@@ -25,12 +27,11 @@ export default function ModalSugerredVias(props) {
   const nbVias = suggeredVias.length - 1;
 
   const formattedVias = suggeredVias.reduce((acc, via, idx) => {
-    const { track, position, geo } = via;
     if (idx !== 0 && idx !== nbVias) {
       return [
         ...acc,
         <div
-          key={`${track.id}--${position}--${geo.coordinates}--${idx}`}
+          key={nextId()}
           className={`d-flex align-items-center p-1 ${via.suggestion && 'suggerred-via-clickable'}`}
         >
           {!via.suggestion && <small className="pr-2">{idx}</small>}
