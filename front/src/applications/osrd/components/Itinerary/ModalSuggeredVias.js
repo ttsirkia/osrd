@@ -24,27 +24,35 @@ export default function ModalSugerredVias(props) {
   const { t } = useTranslation('osrdconf');
   const nbVias = suggeredVias.length - 1;
 
-  const formatVia = (via, idx, idxTrueVia) => (
-    <div
-      key={via.id}
-      className={`d-flex align-items-center p-1 ${via.suggestion && 'suggerred-via-clickable'}`}
-    >
-      {!via.suggestion && <small className="pr-2">{idxTrueVia}</small>}
-      <i className={`${via.suggestion ? 'text-muted' : 'text-info'} icons-itinerary-bullet mr-2`} />
-      {via.name || `KM ${Math.round(via.position) / 1000}`}
-      {via.suggestion && (
-        <button
-          className="btn btn-sm btn-only-icon ml-auto"
-          type="button"
-          onClick={() => convertPathfindingVias(suggeredVias, idx)}
+  const formattedVias = suggeredVias.reduce((acc, via, idx) => {
+    const { track, position, geo } = via;
+    if (idx !== 0 && idx !== nbVias) {
+      return [
+        ...acc,
+        <div
+          key={`${track.id}--${position}--${geo.coordinates}--${idx}`}
+          className={`d-flex align-items-center p-1 ${via.suggestion && 'suggerred-via-clickable'}`}
         >
-          <i className="icons-add" />
-        </button>
-      )}
-    </div>
-  );
+          {!via.suggestion && <small className="pr-2">{idx}</small>}
+          <i
+            className={`${via.suggestion ? 'text-muted' : 'text-info'} icons-itinerary-bullet mr-2`}
+          />
+          {via.name || `KM ${Math.round(via.position) / 1000}`}
+          {via.suggestion && (
+            <button
+              className="btn btn-sm btn-only-icon ml-auto"
+              type="button"
+              onClick={() => convertPathfindingVias(suggeredVias, idx)}
+            >
+              <i className="icons-add" />
+            </button>
+          )}
+        </div>,
+      ];
+    }
+    return acc;
+  }, []);
 
-  let idxTrueVia = 0;
   return (
     <ModalSNCF htmlID="suggeredViasModal">
       <ModalHeaderSNCF>
@@ -56,13 +64,7 @@ export default function ModalSugerredVias(props) {
       <ModalBodySNCF>
         <div className="suggered-vias">
           {pathfindingInProgress && <LoaderPathfindingInProgress />}
-          {suggeredVias.map((via, idx) => {
-            if (idx !== 0 && idx !== nbVias) {
-              if (!via.suggestion) idxTrueVia += 1;
-              return formatVia(via, idx, idxTrueVia);
-            }
-            return null;
-          })}
+          {formattedVias}
         </div>
       </ModalBodySNCF>
       <ModalFooterSNCF>
