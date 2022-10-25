@@ -189,6 +189,11 @@ public class UndirectedInfraBuilder {
     private void makeWaypoint(HashMap<String, TrackSectionImpl> trackSectionsByID,
                             RJSRouteWaypoint waypoint, boolean isBufferStop) {
         var track = RJSObjectParsing.getTrackSection(waypoint.track, trackSectionsByID);
+        if (track == null)
+            throw new InvalidInfraError(String.format(
+                    "Track referenced by detector doesn't exist (track id = \"%s\", detector id = \"%s\")",
+                    waypoint.track.id.id, waypoint.id
+            ));
         var newWaypoint = new DetectorImpl(track, waypoint.position, isBufferStop, waypoint.id);
         var detectors = detectorLists.get(track);
         for (var detector : detectors)
