@@ -10,6 +10,9 @@ import {
 import {
   interpolateOnTime,
   offsetSeconds,
+  MergedDataPoint,
+} from '../../applications/osrd/components/Helpers/ChartHelpers';
+import { TrainScheduleResultData } from 'common/api/osrdApi'
 } from 'applications/osrd/components/Helpers/ChartHelpers';
 import undoableSimulation, { REDO_SIMULATION, UNDO_SIMULATION } from './simulation';
 
