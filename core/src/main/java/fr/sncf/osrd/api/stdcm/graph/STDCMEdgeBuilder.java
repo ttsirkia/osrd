@@ -155,7 +155,7 @@ public class STDCMEdgeBuilder {
                 prevMaximumAddedDelay - delayNeeded,
                 graph.delayManager.findMaximumAddedDelay(route, startTime + delayNeeded, envelope)
         );
-        var newEdge = new STDCMEdge(
+        return new STDCMEdge(
                 route,
                 envelope,
                 startTime + delayNeeded,
@@ -166,16 +166,6 @@ public class STDCMEdgeBuilder {
                 prevNode,
                 route.getInfraRoute().getLength() - envelope.getEndPos()
         );
-        if (maximumDelay < 0) {
-            // We need to make the train go slower
-            newEdge = graph.allowanceManager.tryEngineeringAllowance(newEdge);
-            if (newEdge == null)
-                return null;
-        }
-        newEdge = graph.backtrackingManager.backtrack(newEdge); // Fixes any speed discontinuity
-        if (newEdge == null || graph.delayManager.isRunTimeTooLong(newEdge))
-            return null;
-        return newEdge;
     }
 
     /** Creates all the edges in the given settings, then look for one that shares the given time of next occupancy.

@@ -45,8 +45,10 @@ public class AllowanceManager {
         if (newPreviousEdge == null)
             return null; // The new edges are invalid, conflicts shouldn't happen here but it can be too slow
         var newPreviousNode = newPreviousEdge.getEdgeEnd(graph);
+        assert newPreviousNode != null;
         return STDCMEdgeBuilder.fromNode(graph, newPreviousNode, oldEdge.route())
-                .findEdgeSameNextOccupancy(oldEdge.timeNextOccupancy());
+                .findEdgeSameNextOccupancy(oldEdge.timeNextOccupancy())
+                .finishBuildingEdge(graph);
     }
 
     /** Re-create the edges in order, following the given envelope. */
@@ -70,7 +72,8 @@ public class AllowanceManager {
                     .setPrevNode(node)
                     .setEnvelope(extractEnvelopeSection(totalEnvelope, previousEnd, end))
                     .setForceMaxDelay(true)
-                    .findEdgeSameNextOccupancy(edge.timeNextOccupancy());
+                    .findEdgeSameNextOccupancy(edge.timeNextOccupancy())
+                    .finishBuildingEdge(graph);
             if (prevEdge == null)
                 return null;
             previousEnd = end;
