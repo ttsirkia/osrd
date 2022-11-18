@@ -45,6 +45,8 @@ class TrainScheduleView(
             simulation_needed = True
         elif "allowances" in data and data["allowances"] != train_schedule.allowances:
             simulation_needed = True
+        elif "speed_limit_composition" in data and data["speed_limit_composition"] != train_schedule.speed_limit_composition:
+            simulation_needed = True
 
         serializer.save()
 

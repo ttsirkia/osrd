@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { sec2datetime, sec2time, time2datetime, time2sec } from 'utils/timeManipulation';
 import { updateMustRedraw, updateSelectedTrain, updateSimulation } from 'reducers/osrdsimulation';
 import { useDispatch, useSelector } from 'react-redux';
+import { setFailure } from 'reducers/main';
+import { get } from 'common/requests';
 
 import InputSNCF from 'common/BootstrapSNCF/InputSNCF';
 import { IoMdEye } from 'react-icons/io';
@@ -11,6 +13,7 @@ import nextId from 'react-id-generator';
 import { timeShiftTrain } from 'applications/osrd/components/Helpers/ChartHelpers';
 import { useDebounce } from 'utils/helpers';
 import { useTranslation } from 'react-i18next';
+import SelectImprovedSNCF from 'common/BootstrapSNCF/SelectImprovedSNCF';
 
 function InputName(props) {
   const { name, changeTrainName, idx, typeOfInputFocused } = props;
@@ -54,17 +57,40 @@ function InputTime(props) {
   );
 }
 
+function InputTrainComposition(props) {
+  const { tagsList, train } = props;
+  const [localTrain, setLocalTrain] = useState(train);
+
+  const handleChange = (value) => {
+    setLocalTrain(value);
+  };
+
+  return tagsList ? (
+    <SelectImprovedSNCF
+      options={tagsList}
+      onChange={(e) => handleChange(e)}
+      selectedValue={localTrain.speed_limit_composition}
+      sm
+      withSearch
+    />
+  ) : (
+    localTrain.speed_limit_composition
+  );
+}
+
 export default function TrainsList(props) {
   const { toggleTrainList } = props;
   const { selectedProjection, selectedTrain, departureArrivalTimes } = useSelector(
     (state) => state.osrdsimulation
   );
   const simulation = useSelector((state) => state.osrdsimulation.simulation.present);
+  const { infraID } = useSelector((state) => state.osrdconf);
   const dispatch = useDispatch();
   const [formattedList, setFormattedList] = useState(null);
   const [filter, setFilter] = useState('');
   const [trainNameClickedIDX, setTrainNameClickedIDX] = useState(undefined);
   const [typeOfInputFocused, setTypeOfInputFocused] = useState(undefined);
+  const [speedLimitsTags, setSpeedLimitsTags] = useState(undefined);
   const [inputName, setInputName] = useState(undefined);
   const [inputTime, setInputTime] = useState(undefined);
   const [onInput, setOnInput] = useState(false);
@@ -102,6 +128,27 @@ export default function TrainsList(props) {
     trains[idx] = timeShiftTrain(trains[selectedTrain], offset);
     dispatch(updateSimulation({ ...simulation, trains }));
   };
+
+  const getTagsList = async (zoom, params) => {
+    try {
+      const tagsList = await get(`/infra/${infraID}/speed_limit_tags/`);
+      console.log(tagsList);
+      setSpeedLimitsTags(tagsList);
+      console.log(speedLimitsTags);
+    } catch (e) {
+      dispatch(
+        setFailure({
+          name: t('errorMessages.unableToRetrieveTags'),
+          message: `${e.message} : ${e.response && e.response.data.detail}`,
+        })
+      );
+      console.log('ERROR', e);
+    }
+  };
+
+  useEffect(() => {
+    if (!speedLimitsTags) getTagsList();
+  }, []);
 
   const debouncedInputName = useDebounce(inputName, 500);
   const debouncedInputTime = useDebounce(inputTime, 500);
@@ -180,7 +227,9 @@ export default function TrainsList(props) {
               <div className="cell-inner">{train.labels && train.labels.join(' / ')}</div>
             </td>
             <td>
-              <div className="cell-inner">{train.speed_limit_composition}</div>
+              <div className="cell-inner">
+                <InputTrainComposition tagsList={speedLimitsTags} train={train} />
+              </div>
             </td>
             <td>
               <div className="cell-inner">
