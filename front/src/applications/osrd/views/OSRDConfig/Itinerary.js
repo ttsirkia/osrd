@@ -80,7 +80,7 @@ function Itinerary(props) {
       if (idx !== 0 && idx !== count && (!step.suggestion || idxToAdd === idx)) {
         vias.push({
           ...step,
-          id: step.track.id,
+          id: step.position,
           clickLngLat: [
             step[map.mapTrackSources.substr(0, 3)].coordinates[0],
             step[map.mapTrackSources.substr(0, 3)].coordinates[1],
