@@ -55,7 +55,7 @@ data class SigBlock(
     val stopsAtBufferStop: Boolean,
     val signalTypes: List<String>,
     val signalSettings: List<SigSettings>,
-    val signalPositions: List<Distance>,
+    val signalPositions: DistanceList,
     val length: Distance,
 )
 
@@ -80,5 +80,5 @@ interface SignalingSystemDriver {
     val settingsSchema: SigSettingsSchema
     val isBlockDelimiterExpr: String
 
-    fun checkBlock(block: SigBlock)
+    fun checkBlock(reporter: DiagnosisReporter, block: SigBlock)
 }

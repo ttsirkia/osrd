@@ -5,6 +5,7 @@ import fr.sncf.osrd.signaling.ZoneStatus
 import fr.sncf.osrd.signaling.bapr.BAPR
 import fr.sncf.osrd.signaling.bapr.BAPRtoBAL
 import fr.sncf.osrd.signaling.bapr.BAPRtoBAPR
+import fr.sncf.osrd.signaling.impl.DiagnosisReporterImpl
 import fr.sncf.osrd.signaling.impl.SigSystemManagerImpl
 import fr.sncf.osrd.signaling.impl.SignalingSimulatorImpl
 import fr.sncf.osrd.sim_infra.api.*
@@ -95,14 +96,15 @@ class TestBAPRtoBAL {
         sigSystemManager.addSignalDriver(BALtoBAL)
         sigSystemManager.addSignalDriver(BAPRtoBAPR)
         sigSystemManager.addSignalDriver(BAPRtoBAL)
+        val reporter = DiagnosisReporterImpl()
         val simulator = SignalingSimulatorImpl(sigSystemManager)
         val loadedSignalInfra = simulator.loadSignals(infra)
-        val blockInfra = simulator.buildBlocks(infra, loadedSignalInfra)
+        val blockInfra = simulator.buildBlocks(reporter, infra, loadedSignalInfra)
         val fullPath = mutableStaticIdxArrayListOf<Block>()
         fullPath.add(blockInfra.getBlocksAt(detectorW.normal).first())
         fullPath.add(blockInfra.getBlocksAt(detectorX.normal).first())
         fullPath.add(blockInfra.getBlocksAt(detectorY.normal).first())
-        val zoneStates = mutableListOf<ZoneStatus>(ZoneStatus.CLEAR,ZoneStatus.CLEAR,ZoneStatus.INCOMPATIBLE)
+        val zoneStates = mutableListOf(ZoneStatus.CLEAR, ZoneStatus.CLEAR, ZoneStatus.INCOMPATIBLE)
         val res = simulator.evaluate(infra, loadedSignalInfra, blockInfra, fullPath, 0, fullPath.size, zoneStates)
         val logicalSignals = listOf(signalm, signalM, signaln, signalN).map{loadedSignalInfra.getLogicalSignals(it).first()}
         val expectedAspects = listOf("VL", "VL", "A", "C")

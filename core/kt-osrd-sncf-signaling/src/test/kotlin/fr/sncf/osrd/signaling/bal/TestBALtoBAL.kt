@@ -2,6 +2,7 @@ package fr.sncf.osrd.signaling.bal
 
 import fr.sncf.osrd.signaling.SigBlock
 import fr.sncf.osrd.signaling.ZoneStatus
+import fr.sncf.osrd.signaling.impl.DiagnosisReporterImpl
 import fr.sncf.osrd.signaling.impl.SigSystemManagerImpl
 import fr.sncf.osrd.signaling.impl.SignalingSimulatorImpl
 import fr.sncf.osrd.sim_infra.api.Block
@@ -109,17 +110,17 @@ class TestBALtoBAL {
         val infra = builder.build()
         // endregion
 
+        val reporter = DiagnosisReporterImpl()
         val sigSystemManager = SigSystemManagerImpl()
         sigSystemManager.addSignalingSystem(BAL)
         sigSystemManager.addSignalDriver(BALtoBAL)
         val simulator = SignalingSimulatorImpl(sigSystemManager)
         val loadedSignalInfra = simulator.loadSignals(infra)
-        val blockInfra = simulator.buildBlocks(infra, loadedSignalInfra)
+        val blockInfra = simulator.buildBlocks(reporter, infra, loadedSignalInfra)
         val fullPath = mutableStaticIdxArrayListOf<Block>()
         fullPath.add(blockInfra.getBlocksAt(detectorU.normal).first())
         fullPath.add(blockInfra.getBlocksAt(detectorV.normal).first())
-        //fullPath.add(blockInfra.getBlocksAt(detectorY.normal).first())
-        val zoneStates = mutableListOf<ZoneStatus>(ZoneStatus.CLEAR,ZoneStatus.CLEAR,ZoneStatus.CLEAR )
+        val zoneStates = mutableListOf(ZoneStatus.CLEAR, ZoneStatus.CLEAR, ZoneStatus.CLEAR)
         val res = simulator.evaluate(infra, loadedSignalInfra, blockInfra, fullPath, 0, fullPath.size, zoneStates)
         assertEquals("A", res[loadedSignalInfra.getLogicalSignals(signalV).first()]!!.getEnum("aspect"))
     }
