@@ -22,6 +22,17 @@ fun ZoneStatus.toProtectionStatus(): ProtectionStatus {
     }
 }
 
+class DiagnosisReporterImpl : DiagnosisReporter {
+    override fun warn() {
+        TODO("Not yet implemented")
+    }
+
+    override fun err() {
+        TODO("Not yet implemented")
+    }
+
+}
+
 class SignalingSimulatorImpl(override val sigModuleManager: SigSystemManager) : SignalingSimulator {
     private fun loadSignalSetting(rawSettings: Map<String, String>, schema: SigSettingsSchema): SigSettings {
         return schema(rawSettings)
@@ -52,9 +63,26 @@ class SignalingSimulatorImpl(override val sigModuleManager: SigSystemManager) : 
         }
     }
 
-
-    override fun buildBlocks(rawSignalingInfra: RawSignalingInfra, loadedSignalInfra: LoadedSignalInfra): BlockInfra {
-        return internalBuildBlocks(sigModuleManager, rawSignalingInfra, loadedSignalInfra)
+    override fun buildBlocks(
+        reporter: DiagnosisReporter,
+        rawSignalingInfra: RawSignalingInfra,
+        loadedSignalInfra: LoadedSignalInfra
+    ): BlockInfra {
+        val blockInfra = internalBuildBlocks(sigModuleManager, rawSignalingInfra, loadedSignalInfra)
+        for (block in blockInfra.blocks) {
+            val sigSystem = blockInfra.getBlockSignalingSystem(block)
+            val path = blockInfra.getBlockPath(block)
+            val length = Distance(path.map { rawSignalingInfra.getZonePathLength(it) }.sumOf { it.millimeters })
+            val startAtBufferStop = blockInfra.blockStartAtBufferStop(block)
+            val stopAtBufferStop = blockInfra.blockStopAtBufferStop(block)
+            val signals = blockInfra.getBlockSignals(block)
+            val signalTypes = signals.map { rawSignalingInfra.getSignalingSystemId(it) }
+            val signalSettings = signals.map { loadedSignalInfra.getSettings(it) }
+            val signalsPositions = blockInfra.getSignalsPositions(block)
+            val sigBlock = SigBlock(startAtBufferStop, stopAtBufferStop, signalTypes, signalSettings, signalsPositions, length)
+            sigModuleManager.checkSignalingSystemBlock(reporter, sigSystem, sigBlock)
+        }
+        return blockInfra
     }
 
     override fun evaluate(
