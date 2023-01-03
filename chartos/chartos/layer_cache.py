@@ -20,9 +20,6 @@ class AffectedTile:
     y: int
     z: int
 
-    def to_json(self):
-        return {"x": self.x, "y": self.y, "z": self.z}
-
 
 def get_cache_tile_key(view_prefix: str, tile: AffectedTile):
     return f"{view_prefix}.tile/{tile.z}/{tile.x}/{tile.y}"
@@ -33,13 +30,6 @@ def get_xy(lat: float, lon: float, zoom: int) -> Tuple[int, int]:
     x = floor((lon + 180.0) / 360.0 * n)
     y = floor((1.0 - asinh(tan(radians(lat))) / pi) / 2.0 * n)
     return x, y
-
-
-def get_nw_deg(z: int, x: int, y: int):
-    n = 2.0**z
-    lon_deg = x / n * 360.0 - 180.0
-    lat_rad = atan(sinh(pi * (1 - 2 * y / n)))
-    return degrees(lat_rad), lon_deg
 
 
 def find_tiles(max_zoom, bbox) -> List[AffectedTile]:
