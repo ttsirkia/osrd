@@ -24,7 +24,7 @@ from .settings import Settings, get_settings
 
 router = APIRouter()
 
-
+# DONE
 @router.get("/health/")
 async def health(
     psql: Connection = Depends(PSQLPool.get),
@@ -34,7 +34,7 @@ async def health(
     await redis.ping()
     return ""
 
-
+# TODO
 @router.get("/info/")
 async def info(config: Config = Depends(get_config)):
     return config.todict()

@@ -4,11 +4,19 @@ mod layer_cache;
 pub use bounding_box::BoundingBox;
 pub use bounding_box::InvalidationZone;
 
-use reqwest::Client;
-use serde_json::json;
-
 use crate::client::ChartosConfig;
-
+use crate::client::RedisConfig;
+use crate::db_connection::RedisConnections;
+use core::result::Result;
+use deadpool_redis::{
+    redis::{cmd, FromRedisValue, RedisError, RedisResult},
+    Config, Runtime,
+};
+use reqwest::Client;
+use rocket::{routes, Route, State};
+use rocket_db_pools::{deadpool_redis, Connection, Database};
+use serde_json::json;
+use std::collections::HashMap;
 const LAYERS: [&str; 12] = [
     "track_sections",
     "signals",
@@ -97,5 +105,77 @@ async fn invalidate_layer(infra_id: i32, layer: &str, chartos_config: &ChartosCo
         .expect("Failed to send invalidate request to chartos");
     if !resp.status().is_success() {
         panic!("Failed to invalidate chartos layer: {}", resp.status());
+    }
+}
+
+pub fn routes() -> HashMap<&'static str, Vec<Route>> {
+    HashMap::from([("/chartos", routes![health, info])])
+}
+
+#[get("/health")]
+pub async fn health(pool: &RedisConnections) -> () {
+    let mut conn = pool.get().await.unwrap();
+    cmd("PING").query_async::<_, ()>(&mut conn).await.unwrap()
+}
+
+#[get("/info")]
+pub async fn info(pool: &RedisConnections) {
+    let mut conn = pool.get().await.unwrap();
+    cmd("SET")
+        .arg(&["deadpool/test_key", "42"])
+        .query_async::<_, ()>(&mut conn)
+        .await
+        .unwrap();
+    let value: String = cmd("GET")
+        .arg(&["deadpool/test_key"])
+        .query_async::<_, String>(&mut conn)
+        .await
+        .unwrap();
+
+    assert_eq!(value, "42".to_string());
+    let result = cmd("CONFIG")
+        .arg("GET")
+        .arg("syslog-ident")
+        .query_async::<_, String>(&mut conn)
+        .await
+        .ok();
+    println!("{}", &result.unwrap());
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::client::PostgresConfig;
+    use crate::create_server;
+    use rocket::http::Status;
+    use rocket::local::blocking::Client;
+
+    /// Create a test editoast client
+    /// This client create a single new connection to the database
+    pub fn create_test_client() -> Client {
+        let pg_config = PostgresConfig {
+            pool_size: 1,
+            ..Default::default()
+        };
+        let rocket = create_server(
+            &Default::default(),
+            &pg_config,
+            Default::default(),
+            Default::default(),
+        );
+        Client::tracked(rocket).expect("valid rocket instance")
+    }
+
+    #[test]
+    fn health() {
+        let client = create_test_client();
+        let response = client.get("/chartos/health").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+    }
+
+    #[test]
+    fn info() {
+        let client = create_test_client();
+        let response = client.get("/chartos/info").dispatch();
+        assert_eq!(response.status(), Status::Ok);
     }
 }
