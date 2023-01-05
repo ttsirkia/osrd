@@ -10,32 +10,32 @@ type JoinExpr = String;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct View {
-    name: String,
-    on_field: String,
-    data_expr: String,
+    pub name: String,
+    pub on_field: String,
+    pub data_expr: String,
     #[serde(default)]
-    exclude_fields: Option<Vec<String>>,
+    pub exclude_fields: Option<Vec<String>>,
     #[serde(default)]
-    joins: Option<Vec<JoinExpr>>,
-    cache_duration: u32,
+    pub joins: Option<Vec<JoinExpr>>,
+    pub cache_duration: u32,
     #[serde(default)]
-    where_expr: Option<Vec<String>>,
+    pub where_expr: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Layer {
-    name: String,
-    table_name: String,
-    views: Vec<View>,
+    pub name: String,
+    pub table_name: String,
+    pub views: Vec<View>,
     #[serde(default)]
-    id_field: Option<String>,
+    pub id_field: Option<String>,
     #[serde(default)]
-    attribution: Option<String>,
+    pub attribution: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct LayersDescription {
-    layers: Vec<Layer>,
+    pub layers: Vec<Layer>,
 }
 
 pub fn parse_layers_description(file: &Path) -> LayersDescription {

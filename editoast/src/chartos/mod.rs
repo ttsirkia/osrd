@@ -1,9 +1,8 @@
 mod bounding_box;
 mod layer_cache;
 mod layers_description;
-pub use bounding_box::BoundingBox;
-pub use bounding_box::InvalidationZone;
-pub use layers_description::parse_layers_description;
+pub use bounding_box::{BoundingBox, InvalidationZone};
+pub use layers_description::{parse_layers_description, LayersDescription};
 
 use crate::client::ChartosConfig;
 use crate::client::RedisConfig;
@@ -120,27 +119,8 @@ pub async fn health(pool: &RedisConnections) -> () {
 }
 
 #[get("/info")]
-pub async fn info(pool: &RedisConnections) {
-    let mut conn = pool.get().await.unwrap();
-    cmd("SET")
-        .arg(&["deadpool/test_key", "42"])
-        .query_async::<_, ()>(&mut conn)
-        .await
-        .unwrap();
-    let value: String = cmd("GET")
-        .arg(&["deadpool/test_key"])
-        .query_async::<_, String>(&mut conn)
-        .await
-        .unwrap();
-
-    assert_eq!(value, "42".to_string());
-    let result = cmd("CONFIG")
-        .arg("GET")
-        .arg("syslog-ident")
-        .query_async::<_, String>(&mut conn)
-        .await
-        .ok();
-    println!("{}", &result.unwrap());
+pub async fn info(layers_description: &State<LayersDescription>) {
+    println!("{}", layers_description.inner().layers[0].name);
 }
 
 #[cfg(test)]

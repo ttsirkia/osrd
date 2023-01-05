@@ -109,7 +109,7 @@ pub fn create_server(
     }
     // Manage States
     let layers_description =
-        parse_layers_description(Path::new("./chartos/layers_description.yml"));
+        parse_layers_description(Path::new("./src/chartos/layers_description.yml"));
     rocket = rocket.manage(layers_description);
     rocket
 }
