@@ -14,6 +14,8 @@ mod schema;
 mod tables;
 mod views;
 
+use crate::schema::RailJson;
+use chartos::parse_layers_description;
 use chashmap::CHashMap;
 use clap::Parser;
 use client::{
@@ -31,10 +33,9 @@ use rocket_db_pools::Database;
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::Path;
 use std::process::exit;
 use std::sync::Arc;
-
-use crate::schema::RailJson;
 
 #[rocket::main]
 async fn main() {
@@ -106,6 +107,10 @@ pub fn create_server(
     for (base, routes) in chartos::routes() {
         rocket = rocket.mount(base, routes);
     }
+    // Manage States
+    let layers_description =
+        parse_layers_description(Path::new("./chartos/layers_description.yml"));
+    rocket = rocket.manage(layers_description);
     rocket
 }
 

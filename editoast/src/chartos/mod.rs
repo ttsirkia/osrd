@@ -1,8 +1,9 @@
 mod bounding_box;
 mod layer_cache;
-
+mod layers_description;
 pub use bounding_box::BoundingBox;
 pub use bounding_box::InvalidationZone;
+pub use layers_description::parse_layers_description;
 
 use crate::client::ChartosConfig;
 use crate::client::RedisConfig;
