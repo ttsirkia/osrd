@@ -1,8 +1,10 @@
 mod bounding_box;
 mod layer_cache;
 mod layers_description;
+use crate::api_error::{ApiError, ApiResult};
 pub use bounding_box::{BoundingBox, InvalidationZone};
 pub use layers_description::{parse_layers_description, LayersDescription};
+use rocket::serde::json::{json, Error as JsonError, Json, Value as JsonValue};
 
 use crate::client::ChartosConfig;
 use crate::client::RedisConfig;
@@ -15,7 +17,6 @@ use deadpool_redis::{
 use reqwest::Client;
 use rocket::{routes, Route, State};
 use rocket_db_pools::{deadpool_redis, Connection, Database};
-use serde_json::json;
 use std::collections::HashMap;
 const LAYERS: [&str; 12] = [
     "track_sections",
@@ -119,16 +120,20 @@ pub async fn health(pool: &RedisConnections) -> () {
 }
 
 #[get("/info")]
-pub async fn info(layers_description: &State<LayersDescription>) {
-    println!("{}", layers_description.inner().layers[0].name);
+pub async fn info(layers_description: &State<LayersDescription>) -> ApiResult<JsonValue> {
+    Ok(json!(layers_description.layers))
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::chartos::layers_description::Layer;
+    use crate::chartos::parse_layers_description;
     use crate::client::PostgresConfig;
     use crate::create_server;
     use rocket::http::Status;
     use rocket::local::blocking::Client;
+    use std::fs;
+    use std::path::Path;
 
     /// Create a test editoast client
     /// This client create a single new connection to the database
@@ -158,5 +163,10 @@ mod tests {
         let client = create_test_client();
         let response = client.get("/chartos/info").dispatch();
         assert_eq!(response.status(), Status::Ok);
+        let expected_result =
+            parse_layers_description(Path::new("./src/chartos/layers_description.yml")).layers;
+        let actual_result: Vec<Layer> =
+            serde_json::from_str(&response.into_string().unwrap()).unwrap();
+        assert_eq!(actual_result, expected_result)
     }
 }

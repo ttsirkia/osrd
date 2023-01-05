@@ -8,18 +8,22 @@ use std::path::Path;
 //                            C is an alias for B
 type JoinExpr = String;
 
+fn empty_vec() -> Vec<String> {
+    vec![]
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct View {
     pub name: String,
     pub on_field: String,
     pub data_expr: String,
-    #[serde(default)]
-    pub exclude_fields: Option<Vec<String>>,
-    #[serde(default)]
-    pub joins: Option<Vec<JoinExpr>>,
+    #[serde(default = "empty_vec")]
+    pub exclude_fields: Vec<String>,
+    #[serde(default = "empty_vec")]
+    pub joins: Vec<JoinExpr>,
     pub cache_duration: u32,
-    #[serde(default)]
-    pub where_expr: Option<Vec<String>>,
+    #[serde(default = "empty_vec")]
+    pub where_expr: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]

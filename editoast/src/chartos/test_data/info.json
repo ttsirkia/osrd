@@ -1,0 +1,398 @@
+[
+    {
+        "name": "track_sections",
+        "table_name": "osrd_infra_tracksectionlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "track_section.data",
+                "exclude_fields": [
+                    "geo",
+                    "sch"
+                ],
+                "joins": [
+                    "inner join osrd_infra_tracksectionmodel track_section on track_section.obj_id = layer.obj_id and track_section.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "track_section.data",
+                "exclude_fields": [
+                    "geo",
+                    "sch"
+                ],
+                "joins": [
+                    "inner join osrd_infra_tracksectionmodel track_section on track_section.obj_id = layer.obj_id and track_section.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "signals",
+        "table_name": "osrd_infra_signallayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "signal.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_signalmodel signal on signal.obj_id = layer.obj_id and signal.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "signal.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_signalmodel signal on signal.obj_id = layer.obj_id and signal.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "speed_sections",
+        "table_name": "osrd_infra_speedsectionlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "speed_section.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_speedsectionmodel speed_section on speed_section.obj_id = layer.obj_id and speed_section.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": [
+                    "not (speed_section.data @? '$.extensions.lpv_sncf.z')"
+                ]
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "speed_section.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_speedsectionmodel speed_section on speed_section.obj_id = layer.obj_id and speed_section.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": [
+                    "not (speed_section.data @? '$.extensions.lpv_sncf.z')"
+                ]
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "lpv",
+        "table_name": "osrd_infra_speedsectionlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "speed_section.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_speedsectionmodel speed_section on speed_section.obj_id = layer.obj_id and speed_section.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": [
+                    "speed_section.data @? '$.extensions.lpv_sncf.z'"
+                ]
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "speed_section.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_speedsectionmodel speed_section on speed_section.obj_id = layer.obj_id and speed_section.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": [
+                    "speed_section.data @? '$.extensions.lpv_sncf.z'"
+                ]
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "track_section_links",
+        "table_name": "osrd_infra_tracksectionlinklayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "track_section_link.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_tracksectionlinkmodel track_section_link on track_section_link.obj_id = layer.obj_id and track_section_link.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "track_section_link.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_tracksectionlinkmodel track_section_link on track_section_link.obj_id = layer.obj_id and track_section_link.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "switches",
+        "table_name": "osrd_infra_switchlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "switch.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_switchmodel switch on switch.obj_id = layer.obj_id and switch.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "switch.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_switchmodel switch on switch.obj_id = layer.obj_id and switch.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "detectors",
+        "table_name": "osrd_infra_detectorlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "detector.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_detectormodel detector on detector.obj_id = layer.obj_id and detector.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "detector.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_detectormodel detector on detector.obj_id = layer.obj_id and detector.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "buffer_stops",
+        "table_name": "osrd_infra_bufferstoplayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "buffer_stop.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_bufferstopmodel buffer_stop on buffer_stop.obj_id = layer.obj_id and buffer_stop.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "buffer_stop.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_bufferstopmodel buffer_stop on buffer_stop.obj_id = layer.obj_id and buffer_stop.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "routes",
+        "table_name": "osrd_infra_routelayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "route.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_routemodel route on route.obj_id = layer.obj_id and route.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "route.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_routemodel route on route.obj_id = layer.obj_id and route.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "operational_points",
+        "table_name": "osrd_infra_operationalpointlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "operational_point.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_operationalpointmodel operational_point on operational_point.obj_id = layer.obj_id and operational_point.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "operational_point.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_operationalpointmodel operational_point on operational_point.obj_id = layer.obj_id and operational_point.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "catenaries",
+        "table_name": "osrd_infra_catenarylayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "catenary.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_catenarymodel catenary on catenary.obj_id = layer.obj_id and catenary.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "catenary.data",
+                "exclude_fields": [],
+                "joins": [
+                    "inner join osrd_infra_catenarymodel catenary on catenary.obj_id = layer.obj_id and catenary.infra_id = layer.infra_id"
+                ],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "lpv_panels",
+        "table_name": "osrd_infra_lpvpanellayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "layer.data",
+                "exclude_fields": [],
+                "joins": [],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "layer.data",
+                "exclude_fields": [],
+                "joins": [],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    },
+    {
+        "name": "errors",
+        "table_name": "osrd_infra_errorlayer",
+        "views": [
+            {
+                "name": "geo",
+                "on_field": "geographic",
+                "data_expr": "layer.information",
+                "exclude_fields": [],
+                "joins": [],
+                "cache_duration": 3600,
+                "where": []
+            },
+            {
+                "name": "sch",
+                "on_field": "schematic",
+                "data_expr": "layer.information",
+                "exclude_fields": [],
+                "joins": [],
+                "cache_duration": 3600,
+                "where": []
+            }
+        ],
+        "id_field": "id",
+        "attribution": null
+    }
+]
