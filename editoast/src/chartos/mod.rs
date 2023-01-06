@@ -11,14 +11,17 @@ use rocket::serde::json::{json, Error as JsonError, Json, Value as JsonValue};
 
 use crate::client::ChartosConfig;
 use crate::client::RedisConfig;
-use crate::db_connection::RedisConnections;
+use crate::db_connection::{DBConnection, RedisConnections};
 use core::result::Result;
 use deadpool_redis::{
     redis::{cmd, FromRedisValue, RedisError, RedisResult},
     Config, Runtime,
 };
 use reqwest::Client;
-use rocket::{http::Status, routes, Route, State};
+use rocket::{
+    http::{ContentType, Status},
+    routes, Route, State,
+};
 use rocket_db_pools::{deadpool_redis, Connection, Database};
 use std::collections::HashMap;
 
@@ -158,7 +161,7 @@ pub async fn mvt_view_metadata(
     // Check view exists
     get_or_404(&layer.views, view_slug, "Layer view")?;
     let tiles_url_pattern = format!(
-        "{}/tile/{layer_slug}/{view_slug}/{{z}}/{{x}}/{{y}}?infra={infra}",
+        "{}/tile/{layer_slug}/{view_slug}/{{z}}/{{x}}/{{y}}/?infra={infra}",
         self_config.url
     );
 
@@ -173,6 +176,19 @@ pub async fn mvt_view_metadata(
         "maxzoom": self_config.max_zoom,
     }))
 }
+#[get("/tile/<layer_slug>/<view_slug>/<z>/<x>/<y>?<infra>")]
+pub async fn mvt_view_tile(
+    layer_slug: &str,
+    view_slug: &str,
+    z: i64,
+    x: i64,
+    y: i64,
+    infra: i64,
+    layers_description: &State<LayersDescription>,
+    redis_pool: &RedisConnections,
+    psql_conn: DBConnection,
+) {
+}
 
 #[cfg(test)]
 mod tests {
@@ -183,7 +199,9 @@ mod tests {
     use crate::create_server;
     use rocket::http::Status;
     use rocket::local::blocking::Client;
-    use std::io::ErrorKind;
+    use serde_json::{Map, Value};
+    use std::fs::File;
+    use std::io::{BufRead, BufReader, ErrorKind};
     use std::path::Path;
 
     use super::get_or_404;
@@ -202,6 +220,10 @@ mod tests {
             Default::default(),
         );
         Client::tracked(rocket).expect("valid rocket instance")
+    }
+
+    fn expected_json_result(file: &Path) -> Value {
+        serde_json::from_reader(BufReader::new(File::open(file).unwrap())).unwrap()
     }
 
     #[test]
@@ -234,10 +256,27 @@ mod tests {
         assert_eq!(not_found.is_err(), true);
     }
 
-    #[test]
-    fn string_test() {
-        let joe = "jonny";
-        let hello = format!("hello I'm {joe}");
-        println!("{}", hello);
+    macro_rules! test_mvt_view_metadata {
+        ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let (uri, status, expected_response): (&str, Status, &str) = $value;
+                let client = create_test_client();
+
+                let response = client.get(uri).dispatch();
+                assert_eq!(response.status().clone(), status);
+                let expected_body = expected_json_result(Path::new(&format!("./src/chartos/test_data/{expected_response}.json")));
+
+                let body: Value = serde_json::from_str(response.into_string().unwrap().as_str()).unwrap();
+                assert_eq!(expected_body.to_string(), body.to_string())
+            }
+        )*
+        }
+    }
+
+    test_mvt_view_metadata! {
+        get_layer_404: ("/chartos/layer/track_sections/mvt/does_not_exist?infra=2",  Status::NotFound, "get_layer_404"),
+        get_layer: ("/chartos/layer/track_sections/mvt/geo?infra=2",  Status::Ok, "get_layer"),
     }
 }

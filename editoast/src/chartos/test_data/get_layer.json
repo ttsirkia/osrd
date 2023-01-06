@@ -1,0 +1,14 @@
+{
+    "type": "vector",
+    "name": "track_sections",
+    "promoteId": {
+        "track_sections": "id"
+    },
+    "scheme": "xyz",
+    "tiles": [
+        "http://0.0.0.0:8090/tile/track_sections/geo/{z}/{x}/{y}/?infra=2"
+    ],
+    "attribution": "",
+    "minzoom": 0,
+    "maxzoom": 18
+}
