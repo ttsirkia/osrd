@@ -5,6 +5,8 @@ use rocket::serde::json::{json, Error as JsonError, Value as JsonValue};
 use serde_json::{Map, Value};
 use std::error::Error;
 
+use crate::chartos::Named;
+
 pub type ApiResult<T> = Result<T, EditoastError>;
 
 #[derive(Debug, Responder)]
@@ -113,6 +115,27 @@ impl From<InfraLockedError> for EditoastError {
             })
             .as_object()
             .cloned(),
+        )
+    }
+}
+
+pub struct ChartosError<'a, 'b, T: Named> {
+    pub elements: &'a Vec<T>,
+    pub element_name: &'b str,
+    pub array_name: &'b str,
+}
+
+impl<'a, 'b, T: Named> From<ChartosError<'a, 'b, T>> for EditoastError {
+    fn from(err: ChartosError<T>) -> Self {
+        let valid_elements_name: Vec<&str> = err.elements.iter().map(|e| e.name()).collect();
+        Self::create(
+            "chartos:NotFound",
+            format!(
+                "{} {} not found. Expected one of {:?}",
+                err.array_name, err.element_name, valid_elements_name
+            ),
+            Status::NotFound,
+            None,
         )
     }
 }

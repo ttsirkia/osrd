@@ -15,7 +15,7 @@ mod tables;
 mod views;
 
 use crate::schema::RailJson;
-use chartos::parse_layers_description;
+use chartos::{parse_layers_description, SelfConfig};
 use chashmap::CHashMap;
 use clap::Parser;
 use client::{
@@ -61,6 +61,7 @@ async fn run() -> Result<(), Box<dyn Error + Send + Sync>> {
         Commands::ImportRailjson(args) => import_railjson(args, pg_config),
     }
 }
+
 /// Create a rocket server given the config
 pub fn create_server(
     runserver_config: &RunserverArgs,
@@ -98,7 +99,14 @@ pub fn create_server(
         .attach(RedisConnections::init())
         .attach(cors)
         .manage(Arc::<CHashMap<i32, InfraCache>>::default())
-        .manage(chartos_config);
+        .manage(chartos_config)
+        .manage(SelfConfig {
+            url: format!(
+                "http://{}:{}",
+                runserver_config.address, runserver_config.port
+            ),
+            max_zoom: 18,
+        });
 
     // Mount routes
     for (base, routes) in views::routes() {

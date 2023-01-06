@@ -59,7 +59,7 @@ async def mvt_view_metadata(
     layer: Layer = get_or_404(config.layers, layer_slug, "Layer")
     # Check view exists
     get_or_404(layer.views, view_slug, "Layer view")
-    tiles_url_pattern = f"{settings.root_url}/tile/{layer_slug}/{view_slug}/" "{z}/{x}/{y}" f"/?infra={infra}"
+    tiles_url_pattern = f"{settings.root_url}/tile/{layer_slug}/{view_slug}/{{z}}/{{x}}/{{y}}/?infra={infra}"
     return {
         "type": "vector",
         "name": layer.name,

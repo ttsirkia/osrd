@@ -1,7 +1,9 @@
+use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
 use std::fs;
 use std::path::Path;
+
 // select C.stuff from A inner join B C on C.id = C.id;
 //                       \___________________________/
 //                             a join expression
@@ -10,6 +12,10 @@ type JoinExpr = String;
 
 fn empty_vec() -> Vec<String> {
     vec![]
+}
+
+pub trait Named {
+    fn name(&self) -> &str;
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -26,6 +32,12 @@ pub struct View {
     pub where_expr: Vec<String>,
 }
 
+impl Named for View {
+    fn name(&self) -> &str {
+        &self.name
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Layer {
     pub name: String,
@@ -37,9 +49,24 @@ pub struct Layer {
     pub attribution: Option<String>,
 }
 
+impl Named for Layer {
+    fn name(&self) -> &str {
+        &self.name
+    }
+}
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct LayersDescription {
     pub layers: Vec<Layer>,
+}
+
+// TODO move it where more relevant
+#[derive(Debug, Derivative, Clone)]
+#[derivative(Default)]
+pub struct SelfConfig {
+    pub url: String,
+    #[derivative(Default(value = "18"))]
+    pub max_zoom: u32,
 }
 
 pub fn parse_layers_description(file: &Path) -> LayersDescription {

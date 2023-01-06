@@ -2,8 +2,11 @@ mod bounding_box;
 mod layer_cache;
 mod layers_description;
 use crate::api_error::{ApiError, ApiResult};
+use crate::api_error::{ChartosError, EditoastError};
 pub use bounding_box::{BoundingBox, InvalidationZone};
-pub use layers_description::{parse_layers_description, LayersDescription};
+pub use layers_description::{
+    parse_layers_description, Layer, LayersDescription, Named, SelfConfig,
+};
 use rocket::serde::json::{json, Error as JsonError, Json, Value as JsonValue};
 
 use crate::client::ChartosConfig;
@@ -15,9 +18,10 @@ use deadpool_redis::{
     Config, Runtime,
 };
 use reqwest::Client;
-use rocket::{routes, Route, State};
+use rocket::{http::Status, routes, Route, State};
 use rocket_db_pools::{deadpool_redis, Connection, Database};
 use std::collections::HashMap;
+
 const LAYERS: [&str; 12] = [
     "track_sections",
     "signals",
@@ -110,7 +114,7 @@ async fn invalidate_layer(infra_id: i32, layer: &str, chartos_config: &ChartosCo
 }
 
 pub fn routes() -> HashMap<&'static str, Vec<Route>> {
-    HashMap::from([("/chartos", routes![health, info])])
+    HashMap::from([("/chartos", routes![health, info, mvt_view_metadata])])
 }
 
 #[get("/health")]
@@ -124,16 +128,65 @@ pub async fn info(layers_description: &State<LayersDescription>) -> ApiResult<Js
     Ok(json!(layers_description.layers))
 }
 
+fn get_or_404<'a, T: Named>(
+    elements: &'a Vec<T>,
+    element_name: &str,
+    array_name: &str,
+) -> ApiResult<&'a T> {
+    for element in elements.iter() {
+        if element.name() == element_name {
+            return Ok(element);
+        }
+    }
+    Err(ChartosError {
+        elements: elements,
+        element_name: element_name,
+        array_name: array_name,
+    }
+    .into())
+}
+
+#[get("/layer/<layer_slug>/mvt/<view_slug>?<infra>")]
+pub async fn mvt_view_metadata(
+    layer_slug: &str,
+    view_slug: &str,
+    infra: i64,
+    layers_description: &State<LayersDescription>,
+    self_config: &State<SelfConfig>,
+) -> ApiResult<JsonValue> {
+    let layer = get_or_404(&layers_description.layers, layer_slug, "Layer")?;
+    // Check view exists
+    get_or_404(&layer.views, view_slug, "Layer view")?;
+    let tiles_url_pattern = format!(
+        "{}/tile/{layer_slug}/{view_slug}/{{z}}/{{x}}/{{y}}?infra={infra}",
+        self_config.url
+    );
+
+    Ok(json!({
+        "type": "vector",
+        "name": layer.name,
+        "promoteId": {layer.name.clone(): layer.id_field},
+        "scheme": "xyz",
+        "tiles": [tiles_url_pattern],
+        "attribution": layer.attribution.clone().unwrap_or("".to_string()),
+        "minzoom": 0,
+        "maxzoom": self_config.max_zoom,
+    }))
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::api_error::ChartosError;
     use crate::chartos::layers_description::Layer;
     use crate::chartos::parse_layers_description;
     use crate::client::PostgresConfig;
     use crate::create_server;
     use rocket::http::Status;
     use rocket::local::blocking::Client;
-    use std::fs;
+    use std::io::ErrorKind;
     use std::path::Path;
+
+    use super::get_or_404;
 
     /// Create a test editoast client
     /// This client create a single new connection to the database
@@ -168,5 +221,23 @@ mod tests {
         let actual_result: Vec<Layer> =
             serde_json::from_str(&response.into_string().unwrap()).unwrap();
         assert_eq!(actual_result, expected_result)
+    }
+
+    #[test]
+    fn test_get_or_404() {
+        let layers_description =
+            parse_layers_description(Path::new("./src/chartos/layers_description.yml"));
+        let expected_result = &layers_description.layers[1];
+        let actual_result = get_or_404(&layers_description.layers, "signals", "Layer");
+        assert_eq!(expected_result, actual_result.unwrap());
+        let not_found = get_or_404(&layers_description.layers, "does_not_exist", "Layer");
+        assert_eq!(not_found.is_err(), true);
+    }
+
+    #[test]
+    fn string_test() {
+        let joe = "jonny";
+        let hello = format!("hello I'm {joe}");
+        println!("{}", hello);
     }
 }
