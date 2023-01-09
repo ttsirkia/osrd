@@ -187,7 +187,13 @@ pub async fn mvt_view_tile(
     layers_description: &State<LayersDescription>,
     redis_pool: &RedisConnections,
     psql_conn: DBConnection,
-) {
+) -> ApiResult<JsonValue> {
+    let layer = get_or_404(&layers_description.layers, layer_slug, "Layer")?;
+    let view = get_or_404(&layer.views, view_slug, "Layer view")?;
+
+    // try to fetch the tile from the cache
+
+    Ok(json!(""))
 }
 
 #[cfg(test)]
