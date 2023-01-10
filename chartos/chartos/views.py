@@ -1,4 +1,5 @@
 import json
+import os
 from collections import defaultdict
 from functools import reduce
 from typing import Any, Dict, List, Mapping, NewType, Tuple
@@ -34,7 +35,15 @@ async def health(
     await redis.ping()
     return ""
 
-# TODO
+
+@router.get("/version/")
+async def version():
+    describe = os.environ.get("OSRD_GIT_DESCRIBE", None)
+    if not describe:
+        describe = None
+    return {"git_describe": describe}
+
+
 @router.get("/info/")
 async def info(config: Config = Depends(get_config)):
     return config.todict()

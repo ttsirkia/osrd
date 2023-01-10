@@ -18,6 +18,12 @@ tags:
     description: Short term DCM
 
 paths:
+  /health/:
+    get:
+      responses:
+        200:
+          description: Check if Editoast is running correctly
+
   /infra/:
     get:
       tags:
@@ -39,6 +45,36 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Infra"
+  /version/api/:
+    get:
+      responses:
+        200:
+          description: Return the api service version
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  git_describe:
+                    type: string
+                    nullable: true
+                required:
+                  - git_describe
+  /version/core/:
+    get:
+      responses:
+        200:
+          description: Return the core service version
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  git_describe:
+                    type: string
+                    nullable: true
+                required:
+                  - git_describe
 
   /infra/{id}/:
     get:
@@ -159,7 +195,7 @@ paths:
       tags:
         - pathfinding
       summary: |
-        Create a Path given a list of operational points trigram. 
+        Create a Path given a list of operational points trigram.
         Note: This endpoint is used for a proof of concept and shouldn't be used in production.
       requestBody:
         description: Steps of the path
@@ -1248,6 +1284,18 @@ components:
                 properties:
                   is_electric:
                     type: boolean
+        metadata:
+          type: object
+          example:
+            detail: "BB 7200"
+            family: "LOCOMOTIVES"
+            grouping: "Locomotives électriques courant continu"
+            number: "1"
+            reference: "7200"
+            series: "BB 7200"
+            subseries: "GV"
+            type: "Locomotives électriques"
+            unit: "US"
     TrainSchedule:
       allOf:
         - type: object
