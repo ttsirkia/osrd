@@ -25,6 +25,8 @@ use rocket::{
 use rocket_db_pools::{deadpool_redis, Connection, Database};
 use std::collections::HashMap;
 
+use self::layer_cache::Tile;
+
 const LAYERS: [&str; 12] = [
     "track_sections",
     "signals",
@@ -117,7 +119,10 @@ async fn invalidate_layer(infra_id: i32, layer: &str, chartos_config: &ChartosCo
 }
 
 pub fn routes() -> HashMap<&'static str, Vec<Route>> {
-    HashMap::from([("/chartos", routes![health, info, mvt_view_metadata])])
+    HashMap::from([(
+        "/chartos",
+        routes![health, info, mvt_view_metadata, mvt_view_tile],
+    )])
 }
 
 #[get("/health")]
@@ -176,6 +181,20 @@ pub async fn mvt_view_metadata(
         "maxzoom": self_config.max_zoom,
     }))
 }
+
+fn get_layer_cache_prefix(layer_name: &str, infra: i64) -> String {
+    format!("chartis.layer.{layer_name}.infra_{infra}")
+}
+
+fn get_view_cache_prefix(layer_name: &str, infra: i64, view_name: &str) -> String {
+    let layer_prefix = get_layer_cache_prefix(layer_name, infra);
+    format!("{layer_prefix}.{view_name}")
+}
+
+fn get_cache_tile_key(view_prefix: &str, tile: Tile) -> String {
+    format!("{view_prefix}.tile/{}/{}/{}", tile.z, tile.x, tile.y)
+}
+
 #[get("/tile/<layer_slug>/<view_slug>/<z>/<x>/<y>?<infra>")]
 pub async fn mvt_view_tile(
     layer_slug: &str,
@@ -192,6 +211,14 @@ pub async fn mvt_view_tile(
     let view = get_or_404(&layer.views, view_slug, "Layer view")?;
 
     // try to fetch the tile from the cache
+    let view_cache_prefix = get_view_cache_prefix(layer.name(), infra, view.name());
+    let cache_key = get_cache_tile_key(&view_cache_prefix, Tile { x: x, y: y, z: z });
+    let mut redis_connection = redis_pool.get().await.unwrap();
+    let tile_data: String = cmd("GET")
+        .arg(&[cache_key])
+        .query_async(&mut redis_connection)
+        .await
+        .unwrap();
 
     Ok(json!(""))
 }
@@ -284,5 +311,21 @@ mod tests {
     test_mvt_view_metadata! {
         get_layer_404: ("/chartos/layer/track_sections/mvt/does_not_exist?infra=2",  Status::NotFound, "get_layer_404"),
         get_layer: ("/chartos/layer/track_sections/mvt/geo?infra=2",  Status::Ok, "get_layer"),
+    }
+
+    #[test]
+    fn mvt_view_tile() {
+        let client = create_test_client();
+
+        let response = client
+            .get("/chartos/tile/track_sections/geo/0/48/2?infra=1")
+            .dispatch();
+        assert_eq!(response.status().clone(), Status::Ok);
+        // let expected_body = expected_json_result(Path::new(&format!(
+        //     "./src/chartos/test_data/{expected_response}.json"
+        // )));
+
+        // let body: Value = serde_json::from_str(response.into_string().unwrap().as_str()).unwrap();
+        // assert_eq!(expected_body.to_string(), body.to_string())
     }
 }

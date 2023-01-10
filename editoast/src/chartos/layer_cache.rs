@@ -1,9 +1,9 @@
 use core::f64::consts::PI;
 
 pub struct Tile {
-    x: i64,
-    y: i64,
-    z: i64,
+    pub x: i64,
+    pub y: i64,
+    pub z: i64,
 }
 
 type BoundingBox = [[f64; 2]; 2];
