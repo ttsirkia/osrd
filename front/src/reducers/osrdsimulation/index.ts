@@ -28,7 +28,6 @@ import {
   UPDATE_SELECTED_TRAIN,
   UPDATE_SIMULATION,
   UPDATE_SPEEDSPACE_SETTINGS,
-  UPDATE_STICKYBAR,
   UPDATE_SIGNAL_BASE,
   UPDATE_TIME_POSITION,
   UPDATE_DEPARTURE_ARRIVAL_TIMES,
@@ -80,7 +79,6 @@ export const initialState: OsrdSimulationState = {
     maxSpeed: true,
     slopes: false,
   },
-  stickyBar: true,
   signalBase: SIGNAL_BASE_DEFAULT,
   timePosition: undefined,
   consolidatedSimulation: [],
@@ -155,9 +153,6 @@ export default function reducer(inputState: OsrdSimulationState | undefined, act
         break;
       case UPDATE_SIGNAL_BASE:
         draft.signalBase = action.signalBase;
-        break;
-      case UPDATE_STICKYBAR:
-        draft.stickyBar = action.stickyBar;
         break;
       case UPDATE_TIME_POSITION:
         draft.timePosition = action.timePosition;
