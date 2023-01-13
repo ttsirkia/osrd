@@ -53,7 +53,7 @@ export default function App() {
       {(user.isLogged || process.env.REACT_APP_LOCAL_BACKEND) && (
         <HistoryRouter history={history}>
           <Routes>
-            <Route path="/osrd/*" element={<HomeOperationalStudies />} />
+            <Route path="/operational-studies/*" element={<HomeOperationalStudies />} />
             <Route path="/carto/*" element={<HomeCarto />} />
             <Route path="/editor/*" element={<HomeEditor />} />
             <Route path="/stdcm/*" element={<HomeStdcm />} />
