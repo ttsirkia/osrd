@@ -7,7 +7,6 @@ pub use bounding_box::{BoundingBox, InvalidationZone};
 pub use layers_description::{
     parse_layers_description, Layer, LayersDescription, Named, SelfConfig,
 };
-use rocket::form::prelude::field;
 use rocket::serde::json::{json, Error as JsonError, Json, Value as JsonValue};
 
 use crate::client::ChartosConfig;
@@ -199,11 +198,11 @@ fn get_cache_tile_key(view_prefix: &str, tile: Tile) -> String {
 
 fn create_get_object_sql_query(
     layer: &Layer,
-    infra_id: u64,
+    infra_id: i64,
     view: &View,
-    z: u64,
-    x: u64,
-    y: u64,
+    z: i64,
+    x: i64,
+    y: i64,
 ) -> String {
     format!(
         "WITH bbox AS (
@@ -215,7 +214,7 @@ fn create_get_object_sql_query(
             CROSS JOIN bbox 
             {joins} 
         WHERE layer.infra_id = {infra_id} 
-            {where_condition}
+            AND {where_condition}
             AND {on_field} && bbox.geom 
             AND ST_GeometryType({on_field}) != 'ST_GeometryCollection'",
         on_field = view.on_field,
@@ -223,7 +222,7 @@ fn create_get_object_sql_query(
         exclude_fields = view.exclude_fields.join(" - "),
         table_name = layer.table_name,
         joins = view.joins.join(" "),
-        where_condition = format!("{} AND ", view.where_expr.join(" AND ")),
+        where_condition = format!("{}", view.where_expr.join(" AND ")),
     )
 }
 
@@ -245,12 +244,19 @@ pub async fn mvt_view_tile(
     // try to fetch the tile from the cache
     let view_cache_prefix = get_view_cache_prefix(layer.name(), infra, view.name());
     let cache_key = get_cache_tile_key(&view_cache_prefix, Tile { x: x, y: y, z: z });
-    let mut redis_connection = redis_pool.get().await.unwrap();
-    let tile_data: String = cmd("GET")
-        .arg(&[cache_key])
-        .query_async(&mut redis_connection)
-        .await
-        .unwrap();
+
+    println!(
+        "{}",
+        create_get_object_sql_query(layer, infra, view, z, x, y)
+    );
+
+    // let mut redis_connection = redis_pool.get().await.unwrap();
+
+    // let tile_data: String = cmd("GET")
+    //     .arg(&[cache_key])
+    //     .query_async(&mut redis_connection)
+    //     .await
+    //     .unwrap();
 
     Ok(json!(""))
 }
@@ -351,6 +357,9 @@ mod tests {
 
         let response = client
             .get("/chartos/tile/track_sections/geo/0/48/2?infra=1")
+            .dispatch();
+        let response = client
+            .get("/chartos/tile/lpv/geo/0/48/2?infra=1")
             .dispatch();
         assert_eq!(response.status().clone(), Status::Ok);
         // let expected_body = expected_json_result(Path::new(&format!(
