@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import HomeCarto from 'applications/carto/Home';
 import HomeEditor from 'applications/editor/Home';
-import HomeOSRD from 'applications/osrd/Home';
+import HomeOperationalStudies from 'applications/operationalStudies/Home';
 import HomeStdcm from 'applications/stdcm/Home';
 import HomeOpenData from 'applications/opendata/Home';
 import HomeCustomGET from 'applications/customget/Home';
@@ -53,7 +53,7 @@ export default function App() {
       {(user.isLogged || process.env.REACT_APP_LOCAL_BACKEND) && (
         <HistoryRouter history={history}>
           <Routes>
-            <Route path="/osrd/*" element={<HomeOSRD />} />
+            <Route path="/osrd/*" element={<HomeOperationalStudies />} />
             <Route path="/carto/*" element={<HomeCarto />} />
             <Route path="/editor/*" element={<HomeEditor />} />
             <Route path="/stdcm/*" element={<HomeStdcm />} />
