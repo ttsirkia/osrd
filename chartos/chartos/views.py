@@ -131,11 +131,11 @@ def flatten_data(data, separator="_"):
     return _flatten_data_rec(data, separator, {}, "")
 
 
-async def mvt_query(psql, layer, infra, view: View, z: int, x: int, y: int) -> bytes:
+async def mvt_query(psql, layer, infra_id, view: View, z: int, x: int, y: int) -> bytes:
     exclude_fields = ["- " + f"'{key}'" for key in view.exclude_fields]
     query_get_objects = (
         # prepare the bbox of the tile for use in the tile content subquery
-        "WITH bbox AS (SELECT TileBBox($1, $2, $3, 3857) AS geom) "
+        f"WITH bbox AS (SELECT TileBBox({z}, {x}, {y}, 3857) AS geom) "
         # {{{ beginning of the tile content subquery
         "SELECT "
         # the geometry the view is based on, converted to MVT. this field must
@@ -150,7 +150,7 @@ async def mvt_query(psql, layer, infra, view: View, z: int, x: int, y: int) -> b
         # add user defined joins
         f"{' '.join(view.joins)} "
         # filter by infra
-        f"WHERE layer.infra_id = $4 "
+        f"WHERE layer.infra_id = {infra_id} "
         # Where view conditions
         f"{reduce(lambda base, cond: f'{base} AND ({cond}) ', view.where, '')}"
         # we only want objects which are inside the tile BBox
@@ -160,7 +160,7 @@ async def mvt_query(psql, layer, infra, view: View, z: int, x: int, y: int) -> b
     )
 
     async with psql.transaction(isolation="repeatable_read", readonly=True):
-        records = await psql.fetch(query_get_objects, z, x, y, int(infra))
+        records = await psql.fetch(query_get_objects)
 
     # No data found in the tile
     if len(records) == 0:

@@ -7,6 +7,7 @@ pub use bounding_box::{BoundingBox, InvalidationZone};
 pub use layers_description::{
     parse_layers_description, Layer, LayersDescription, Named, SelfConfig,
 };
+use rocket::form::prelude::field;
 use rocket::serde::json::{json, Error as JsonError, Json, Value as JsonValue};
 
 use crate::client::ChartosConfig;
@@ -26,6 +27,7 @@ use rocket_db_pools::{deadpool_redis, Connection, Database};
 use std::collections::HashMap;
 
 use self::layer_cache::Tile;
+use self::layers_description::View;
 
 const LAYERS: [&str; 12] = [
     "track_sections",
@@ -195,6 +197,36 @@ fn get_cache_tile_key(view_prefix: &str, tile: Tile) -> String {
     format!("{view_prefix}.tile/{}/{}/{}", tile.z, tile.x, tile.y)
 }
 
+fn create_get_object_sql_query(
+    layer: &Layer,
+    infra_id: u64,
+    view: &View,
+    z: u64,
+    x: u64,
+    y: u64,
+) -> String {
+    format!(
+        "WITH bbox AS (
+            SELECT TileBBox({z}, {x}, {y}, 3857) AS geom
+        )
+        SELECT ST_AsMVTGeom({on_field}, bbox.geom, 4096, 64) AS geom, 
+            {data_expr} {exclude_fields} AS data 
+        FROM {table_name} layer 
+            CROSS JOIN bbox 
+            {joins} 
+        WHERE layer.infra_id = {infra_id} 
+            {where_condition}
+            AND {on_field} && bbox.geom 
+            AND ST_GeometryType({on_field}) != 'ST_GeometryCollection'",
+        on_field = view.on_field,
+        data_expr = view.data_expr,
+        exclude_fields = view.exclude_fields.join(" - "),
+        table_name = layer.table_name,
+        joins = view.joins.join(" "),
+        where_condition = format!("{} AND ", view.where_expr.join(" AND ")),
+    )
+}
+
 #[get("/tile/<layer_slug>/<view_slug>/<z>/<x>/<y>?<infra>")]
 pub async fn mvt_view_tile(
     layer_slug: &str,
@@ -328,4 +360,7 @@ mod tests {
         // let body: Value = serde_json::from_str(response.into_string().unwrap().as_str()).unwrap();
         // assert_eq!(expected_body.to_string(), body.to_string())
     }
+
+    #[test]
+    fn test_sql_generation() {}
 }
