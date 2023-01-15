@@ -1,0 +1,225 @@
+@font-face {
+  font-family: 'Colonna MT';
+  src: url('/assets/themes/steampunk/COLONNA.TTF');
+}
+@import url(//fonts.googleapis.com/css?family=Questrial|Limelight|Poiret\ One);
+
+:root {
+  --border-radius: .4375rem;
+  --breakpoint-lg: 1024px;
+
+  --steampunk-beige: #bca687;
+  --steampunk-veryverydarkblue: #1c1c1f;
+  --steampunk-verydarkblue: #27262b;
+  --steampunk-darkblue: #44424b;
+  --steampunk-gold: #c78e68;
+  --steampunk-brown: #9b6845;
+  --steampunk-darkbrown: #583722;
+  --steampunk-otherbrown: #3f2b28;
+  --steampunk-blue: #6b9ed8;
+}
+
+body {
+  font-family: 'Questrial', sans-serif !important;
+  color: var(--steampunk-beige) !important;
+  background-color: var(--steampunk-verydarkblue) !important;
+}
+
+button.btn.btn-primary {
+  font-family: 'Poiret One', sans-serif !important;
+	text-transform: uppercase;
+	letter-spacing: 0.4em;
+	font-size: 1em;
+	position: relative;
+	text-decoration: none;
+  overflow: visible !important;
+	padding: 0.5rem;
+  border: 1px solid var(--steampunk-beige) !important;
+	text-align: center;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  color: var(--steampunk-beige);
+  &::before {
+    transition: .2s;
+    content: "";
+    position: absolute;
+    border: 1px solid var(--steampunk-beige);
+    top: -5px;
+    right: 2px;
+    bottom: -5px;
+    left: 2px;
+  }
+  &:hover {
+    color: var(--steampunk-veryverydarkblue);
+    background-color: var(--steampunk-beige) !important;
+    &::before {
+      transition: .2s;
+      content: "";
+      position: absolute;
+      border: 1px solid var(--steampunk-beige);
+      top: -5px;
+      right: -5px;
+      bottom: -5px;
+      left: -5px;
+    }
+  }
+}
+
+// Home
+.mastheader {
+  background-color: var(--steampunk-veryverydarkblue) !important;
+  box-shadow: 2px 0px 15px black;
+  img {
+    display: none;
+  }
+  .mastheader-title {
+    h1 {
+      color: var(--steampunk-beige) !important;
+      font-family: 'Colonna MT';
+      font-size: 2rem;
+      margin-top: 0.75rem;
+    }
+  }
+}
+.application-title {
+  display: flex;
+  flex-direction: column;
+  img {
+    width: 10rem;
+  }
+  img:last-of-type {
+    width: 7rem;
+    opacity: 0.5;
+    margin-top: 1rem;
+  }
+  h1 {
+    color: var(--steampunk-beige);
+    font-family: 'Colonna MT';
+    padding-top: 0;
+  }
+}
+.card {
+  position: relative;
+  border-radius: 0 !important;
+  background-color: var(--steampunk-veryverydarkblue) !important;
+  border: 2px solid var(--steampunk-gold) !important;
+  box-shadow: 2px 2px 20px black;
+  transition: .4s;
+  &.overflow-hidden {
+    overflow: visible !important;
+  }
+  &::before {
+    transition: .2s;
+    content: "";
+    position: absolute;
+    border: 1px solid var(--steampunk-brown);
+    top: -5px;
+    right: 2px;
+    bottom: -5px;
+    left: 2px;
+  }
+  &::after {
+    transition: .2s;
+    content: "";
+    position: absolute;
+    border: 1px solid var(--steampunk-brown);
+    top: 2px;
+    right: -5px;
+    bottom: 2px;
+    left: -5px;
+  }
+  h5 {
+    font-family: 'Poiret One', sans-serif !important;
+    color: var(--steampunk-beige) !important;
+  }
+  img {
+    filter: sepia(1) brightness(0.5);
+  }
+  &:hover {
+    opacity: 1;
+    box-shadow: none;
+    &::before, &::after {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+    img {
+      filter: sepia(1) brightness(1);
+    }
+  }
+}
+
+
+// Project list
+.projects-toolbar {
+  .h1 {
+    font-family: 'Limelight', sans-serif !important;
+    color:  var(--steampunk-beige) !important;
+  }
+  .form-control-container {
+    .form-control-state {
+      border-radius: 0 !important;
+      background-color: var(--steampunk-beige) !important;
+      color: var(--steampunk-veryverydarkblue);
+    }
+  }
+  .options-control {
+    border-radius: 0 !important;
+    border: 1px solid var(--steampunk-gold) !important;
+    input:checked + .options-btn, input[disabled]:checked + .options-btn {
+      background-color: var(--steampunk-beige);
+      color: var(--steampunk-veryverydarkblue);
+      border-radius: 0 !important;
+      border: 2px solid var(--steampunk-gold) !important;
+    }
+    background-color: var(--steampunk-otherbrown) !important;
+  }
+}
+.projects-list-project-card {
+  border-radius: 0;
+  border: 2px solid var(--steampunk-gold) !important;
+  background-color: var(--steampunk-veryverydarkblue) !important;
+  button.btn.btn-primary {
+    position: absolute !important;
+  }
+  &::before {
+    transition: .2s;
+    content: "";
+    position: absolute;
+    border: 1px solid var(--steampunk-brown);
+    top: -5px;
+    right: 2px;
+    bottom: -5px;
+    left: 2px;
+  }
+  &::after {
+    transition: .2s;
+    content: "";
+    position: absolute;
+    border: 1px solid var(--steampunk-brown);
+    top: 2px;
+    right: -5px;
+    bottom: 2px;
+    left: -5px;
+  }
+  .projects-list-project-card-studies {
+    background-color: var(--steampunk-verydarkblue) !important;
+    color: var(--steampunk-beige);
+  }
+  .projects-list-project-card-name {
+    font-weight: bold;
+    color: var(--steampunk-gold);
+  }
+  .projects-list-project-card-img {
+    img {
+      filter: grayscale(1) blur(1px) sepia(1) brightness(1);
+      -webkit-mask: radial-gradient(#000, #0009);
+    }
+  }
+  .projects-list-project-card-tags {
+    .projects-list-project-card-tags-tag {
+      background-color: var(--steampunk-darkbrown) !important;
+    }
+  }
+}

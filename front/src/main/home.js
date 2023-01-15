@@ -8,7 +8,8 @@ import operationalStudiesImg from 'assets/pictures/home/operationalStudies.svg';
 import customgetImg from 'assets/pictures/home/customget.svg';
 import opendataImg from 'assets/pictures/home/opendata.svg';
 import logo from 'assets/logo_osrd_seul_blanc.svg';
-import osrdLogo from 'assets/pictures/osrd.png';
+import osrdLogo from 'assets/themes/steampunk/logo_gold.svg';
+import steamLocPic from 'assets/themes/steampunk/steamloc.svg';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
@@ -22,7 +23,8 @@ export default function Home() {
       <main className="mastcontainer mastcontainer-no-mastnav">
         <div className="application-title">
           <img src={osrdLogo} alt="OSRD logo" />
-          <h1>Open Source Railway Designer</h1>
+          <img src={steamLocPic} alt="OSRD Steam Locomotive" />
+          <h1>OSRD</h1>
         </div>
         <div className="cardscontainer">
           <div className="row">
