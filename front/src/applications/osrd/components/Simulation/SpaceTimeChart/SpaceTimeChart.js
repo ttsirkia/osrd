@@ -1,5 +1,3 @@
-// This Component is outdated and only present for compatibility purpose ! Please amend in Simulation/SpaceTimeChart
-
 import * as d3 from 'd3';
 
 import React, { useEffect, useRef, useState } from 'react';
