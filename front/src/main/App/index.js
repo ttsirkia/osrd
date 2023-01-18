@@ -17,7 +17,6 @@ import HomeStdcm from 'applications/stdcm/Home';
 import { ModalProvider, ModalSNCF } from 'common/BootstrapSNCF/ModalSNCF/ModalProvider';
 import Loader from 'common/Loader';
 import history from 'main/history';
-import { ModalProvider, ModalSNCF } from 'common/BootstrapSNCF/ModalSNCF/ModalProvider';
 import Home from 'main/Home';
 
 export default function App() {
