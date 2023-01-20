@@ -1,7 +1,25 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { updateMustRedraw, updateSpeedSpaceSettings } from 'reducers/osrdsimulation/actions';
+import {
+  updateMustRedraw,
+  updateContextMenu,
+  updateSpeedSpaceSettings,
+  updateChart,
+  updatePositionValues
+} from 'reducers/osrdsimulation/actions';
+import {
+  getAllowancesSettings,
+  getMustRedraw,
+  getPositionValues,
+  getSelectedProjection,
+  getSelectedTrain,
+  getTimePosition,
+  getConsolidatedSimulation,
+  getPresentSimulation,
+} from 'reducers/osrdsimulation/selectors';
+import { changeTrain } from 'applications/osrd/components/TrainList/TrainListHelpers';
+import { persistentUpdateSimulation } from 'reducers/osrdsimulation/simulation';
 import SpaceTimeChart from './SpaceTimeChart';
 
 /**
@@ -11,16 +29,14 @@ import SpaceTimeChart from './SpaceTimeChart';
  */
 const withOSRDData = (Component) =>
   function WrapperComponent(props) {
-    const chartXGEV = useSelector((state) => state.osrdsimulation.chartXGEV);
-    const mustRedraw = useSelector((state) => state.osrdsimulation.mustRedraw);
-    const positionValues = useSelector((state) => state.osrdsimulation.positionValues);
-    const selectedTrain = useSelector((state) => state.osrdsimulation.selectedTrain);
-    const speedSpaceSettings = useSelector((state) => state.osrdsimulation.speedSpaceSettings);
-    const timePosition = useSelector((state) => state.osrdsimulation.timePosition);
-    const simulation = useSelector((state) => state.osrdsimulation.simulation.present);
-    const consolidatedSimulation = useSelector(
-      (state) => state.osrdsimulation.consolidatedSimulation
-    );
+    const allowancesSettings = useSelector(getAllowancesSettings);
+    const mustRedraw = useSelector(getMustRedraw);
+    const positionValues = useSelector(getPositionValues);
+    const selectedTrain = useSelector(getSelectedTrain);
+    const selectedProjection = useSelector(getSelectedProjection);
+    const timePosition = useSelector(getTimePosition);
+    const simulation = useSelector(getPresentSimulation);
+    const consolidatedSimulation = useSelector(getConsolidatedSimulation);
 
     const dispatch = useDispatch();
 
@@ -34,19 +50,62 @@ const withOSRDData = (Component) =>
       dispatch(updateMustRedraw(true));
     };
 
+    // Consequence of direct actions by component
+    const onOffsetTimeByDragging = (trains) => {
+      dispatch(persistentUpdateSimulation({ ...simulation, trains }));
+    };
+
+    const onDragEnding = (dragEnding, setDragEnding) => {
+      if (dragEnding) {
+        // NO TRIGGER, use event status
+        changeTrain(
+          {
+            departure_time: simulation.trains[selectedTrain].base.stops[0].time,
+          },
+          simulation.trains[selectedTrain].id
+        );
+        setDragEnding(false);
+      }
+    };
+
+    // WIP
+    const dispatchUpdatePositionValues = (newPositionValues) => {
+      dispatch(updatePositionValues(newPositionValues));
+    };
+
+    // TO BE REMOVED !
+    const dispatchUpdateMustRedraw = (newMustRedraw) => {
+      dispatch(updateMustRedraw(newMustRedraw));
+    };
+
+    // NO
+    const dispatchUpdateContextMenu = (contextMenu) => {
+      dispatch(updateContextMenu(contextMenu));
+    };
+
+    const dispatchUpdateChart = (chart) => {
+      dispatch(updateChart(chart));
+    };
+
     return (
       <Component
         {...props}
-        simulation={simulation}
-        chartXGEV={chartXGEV}
+        allowancesSettings={allowancesSettings}
+        positionValues={positionValues}
         mustRedraw={mustRedraw}
         dispatch={dispatch}
-        positionValues={positionValues}
+        simulation={simulation}
         selectedTrain={selectedTrain}
-        speedSpaceSettings={speedSpaceSettings}
+        selectedProjection={selectedProjection}
         timePosition={timePosition}
         consolidatedSimulation={consolidatedSimulation}
-        toggleSetting={toggleSetting}
+        onOffsetTimeByDragging={onOffsetTimeByDragging}
+        onDragEnding={onDragEnding}
+        dispatchUpdateMustRedraw={dispatchUpdateMustRedraw}
+        dispatchUpdateContextMenu={dispatchUpdateContextMenu}
+        dispatchUpdateChart={dispatchUpdateChart}
+        dispatchUpdatePositionValues={dispatchUpdatePositionValues}
+        dispatchUpdateChart={dispatchUpdateChart}
       />
     );
   };

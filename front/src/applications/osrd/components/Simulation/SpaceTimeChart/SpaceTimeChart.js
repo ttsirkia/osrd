@@ -16,7 +16,7 @@ import {
   updatePositionValues,
 } from 'reducers/osrdsimulation/actions';
 import { useDispatch, useSelector } from 'react-redux';
-
+import ORSD_GEV_SAMPLE_DATA from '../SpeedSpaceChart/sampleData';
 import { CgLoadbar } from 'react-icons/cg';
 import ChartModal from 'applications/osrd/components/Simulation/ChartModal';
 import { GiResize } from 'react-icons/gi';
@@ -29,8 +29,13 @@ import drawTrain from 'applications/osrd/components/Simulation/SpaceTimeChart/dr
 import { persistentUpdateSimulation } from 'reducers/osrdsimulation/simulation';
 import { useTranslation } from 'react-i18next';
 
-const CHART_ID = 'SpaceTimeChart';
+import {
+  drawOPs,
+  drawAllTrains,
+} from 'applications/osrd/components/Simulation/SpaceTimeChart/d3Helpers';
 
+const CHART_ID = 'SpaceTimeChart';
+/*
 const drawAxisTitle = (chart, rotate) => {
   chart.drawZone
     .append('text')
@@ -41,11 +46,12 @@ const drawAxisTitle = (chart, rotate) => {
     .attr('y', rotate ? chart.height - 10 : 20)
     .text('KM');
 };
+*/
 
 export default function SpaceTimeChart(props) {
   const { heightOfSpaceTimeChart } = props;
   const ref = useRef();
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
   const { t } = useTranslation(['allowances']);
   const {
     allowancesSettings,
@@ -55,8 +61,16 @@ export default function SpaceTimeChart(props) {
     selectedTrain,
     timePosition,
     consolidatedSimulation,
-  } = useSelector((state) => state.osrdsimulation);
-  const simulation = useSelector((state) => state.osrdsimulation.simulation.present);
+    simulation,
+    dispatch,
+    onOffsetTimeByDragging,
+    onDragEnding,
+    dispatchUpdateMustRedraw,
+    dispatchUpdatePositionValues,
+    dispatchUpdateChart,
+    dispatchUpdateContextMenu,
+  } = props;
+
   const keyValues = ['time', 'position'];
   const [rotate, setRotate] = useState(false);
   const [isResizeActive, setResizeActive] = useState(false);
@@ -75,19 +89,28 @@ export default function SpaceTimeChart(props) {
     }
   };
 
+  // ACTIONS
+
+  // Everyhing should be done by Hoc, has no direct effect on Comp behavior
   const offsetTimeByDragging = (offset) => {
+    // Data preop
     const trains = Array.from(simulation.trains);
     trains[selectedTrain] = timeShiftTrain(trains[selectedTrain], offset);
-    dispatch(persistentUpdateSimulation({ ...simulation, trains }));
+    onOffsetTimeByDragging(trains);
   };
 
+  // Ok, isolated
   const toggleRotation = () => {
     d3.select(`#${CHART_ID}`).remove();
     setChart({ ...chart, x: chart.y, y: chart.x });
     setRotate(!rotate);
-    dispatch(updateMustRedraw(true));
+    dispatchUpdateMustRedraw(true);
   };
 
+  // D3 Operations
+
+  // Ok, isolated but useless?
+  /*
   const drawOPs = (chartLocal) => {
     const operationalPointsZone = chartLocal.drawZone
       .append('g')
@@ -114,8 +137,10 @@ export default function SpaceTimeChart(props) {
         .attr('dy', rotate ? 15 : -5);
     });
   };
+  */
 
   // eslint-disable-next-line default-param-last
+  /*
   const drawAllTrains = (reset, forceRedraw = false, newDataSimulation) => {
     const currentDataSimulation = newDataSimulation || dataSimulation;
 
@@ -127,7 +152,7 @@ export default function SpaceTimeChart(props) {
         heightOfSpaceTimeChart,
         keyValues,
         ref,
-        reset,
+        true, // We dont nor pass a reset trigger anymore, reset is an action or a effect
         rotate
       );
 
@@ -135,7 +160,7 @@ export default function SpaceTimeChart(props) {
         dispatch(updateContextMenu(undefined));
       });
 
-      drawOPs(chartLocal);
+      drawOPs(chartLocal, simulation.trains[selectedTrain], rotate);
 
       drawAxisTitle(chartLocal, rotate);
       currentDataSimulation.forEach((train, idx) => {
@@ -176,6 +201,7 @@ export default function SpaceTimeChart(props) {
       setResetChart(false);
     }
   };
+  */
 
   useEffect(() => {
     setDataSimulation(createTrain(dispatch, keyValues, simulation.trains, t));
@@ -190,26 +216,51 @@ export default function SpaceTimeChart(props) {
   }, [dragOffset]);
 
   useEffect(() => {
-    if (dragEnding) {
-      changeTrain(
-        {
-          departure_time: simulation.trains[selectedTrain].base.stops[0].time,
-        },
-        simulation.trains[selectedTrain].id
-      );
-      setDragEnding(false);
-    }
+    onDragEnding(dragEnding, setDragEnding);
   }, [dragEnding]);
 
+  // DO NOT SEE THE POINT
   useEffect(() => {
     setResetChart(true);
   }, [consolidatedSimulation]);
 
   useEffect(() => {
-    setDataSimulation(createTrain(dispatch, keyValues, simulation.trains, t));
-    if (dataSimulation) {
-      drawAllTrains(resetChart);
-      handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
+    const newDataSimulation = createTrain(dispatch, keyValues, simulation.trains, t)
+    setDataSimulation(newDataSimulation);
+    if (newDataSimulation) {
+      drawAllTrains(
+        resetChart,
+        newDataSimulation,
+        mustRedraw,
+        chart,
+        heightOfSpaceTimeChart,
+        keyValues,
+        ref,
+        rotate,
+        dispatch,
+        CHART_ID,
+        simulation,
+        selectedTrain,
+        positionValues,
+        setChart,
+        setResetChart,
+        setYPosition,
+        setZoomLevel,
+        setDragEnding,
+        setDragOffset,
+        yPosition,
+        zoomLevel,
+        selectedProjection,
+        dispatchUpdateMustRedraw,
+        dispatchUpdateChart,
+        dispatchUpdateContextMenu,
+        allowancesSettings,
+        offsetTimeByDragging,
+        false
+      );
+
+      // Reprogram !
+      //handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
     }
   }, [mustRedraw, rotate, selectedTrain, consolidatedSimulation]);
 
@@ -220,8 +271,39 @@ export default function SpaceTimeChart(props) {
     if (dataSimulation) {
       // ADN drawAllTrain already traceVerticalLines
 
-      drawAllTrains(resetChart, true, newDataSimulation);
-      handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
+      drawAllTrains(
+        resetChart,
+        newDataSimulation,
+        dataSimulation,
+        mustRedraw,
+        chart,
+        heightOfSpaceTimeChart,
+        keyValues,
+        ref,
+        rotate,
+        dispatch,
+        CHART_ID,
+        simulation,
+        selectedTrain,
+        positionValues,
+        setChart,
+        setResetChart,
+        setYPosition,
+        setZoomLevel,
+        setDragEnding,
+        setDragOffset,
+        yPosition,
+        zoomLevel,
+        selectedProjection,
+        dispatchUpdateMustRedraw,
+        dispatchUpdateChart,
+        dispatchUpdateContextMenu,
+        allowancesSettings,
+        offsetTimeByDragging,
+        true
+      );
+      // Reprogram !
+      // handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
     }
   }, [simulation.trains]);
 
@@ -234,7 +316,7 @@ export default function SpaceTimeChart(props) {
         LIST_VALUES_NAME_SPACE_TIME,
         timePosition
       );
-      dispatch(updatePositionValues(newPositionValues));
+      dispatchUpdatePositionValues(newPositionValues);
     }
   }, [chart, mustRedraw]);
 
@@ -301,4 +383,28 @@ export default function SpaceTimeChart(props) {
 
 SpaceTimeChart.propTypes = {
   heightOfSpaceTimeChart: PropTypes.number.isRequired,
+  onOffsetTimeByDragging: PropTypes.func,
+  dispatchUpdateMustRedraw: PropTypes.func,
+};
+
+SpaceTimeChart.defaultProps = {
+  heightOfSpeedSpaceChart: 250,
+  simulation: ORSD_GEV_SAMPLE_DATA.simulation.present,
+  chartXGEV: undefined,
+  dispatch: () => {},
+  mustRedraw: ORSD_GEV_SAMPLE_DATA.mustRedraw,
+  positionValues: ORSD_GEV_SAMPLE_DATA.positionValues,
+  selectedTrain: ORSD_GEV_SAMPLE_DATA.selectedTrain,
+  speedSpaceSettings: ORSD_GEV_SAMPLE_DATA.speedSpaceSettings,
+  timePosition: ORSD_GEV_SAMPLE_DATA.timePosition,
+  consolidatedSimulation: ORSD_GEV_SAMPLE_DATA.consolidatedSimulation,
+  onOffsetTimeByDragging: () => {
+    console.log('onOffsetTimeByDragging called');
+  },
+  onDragEnding: () => {
+    console.log('onDragEnding called');
+  },
+  dispatchUpdateMustRedraw: () => {
+    console.log('dispatchUpdateMustRedraw called');
+  },
 };
