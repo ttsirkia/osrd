@@ -86,6 +86,7 @@ function OSRDSimulation() {
   const displaySimulation = useSelector(
     (state: RootState) => state.osrdsimulation.displaySimulation
   );
+  const timetableID = useSelector((state: RootState) => state.osrdconf.timetableID);
   // const simulation = useSelector((state: RootState) => state.osrdsimulation.simulation.present);
   const dispatch = useDispatch();
 
@@ -176,7 +177,7 @@ function OSRDSimulation() {
     return function cleanup() {
       dispatch(updateSimulation({ trains: [] }));
     };
-  }, [selectedProjection]);
+  }, [selectedProjection, timetableID]);
 
   useEffect(() => {
     if (extViewport !== undefined) {
