@@ -24,11 +24,11 @@ fun ZoneStatus.toProtectionStatus(): ProtectionStatus {
 
 class DiagnosisReporterImpl : DiagnosisReporter {
     override fun warn() {
-        TODO("Not yet implemented")
+        //TODO("Not yet implemented")
     }
 
     override fun err() {
-        TODO("Not yet implemented")
+        //TODO("Not yet implemented")
     }
 
 }
@@ -68,7 +68,7 @@ class SignalingSimulatorImpl(override val sigModuleManager: SigSystemManager) : 
         rawSignalingInfra: RawSignalingInfra,
         loadedSignalInfra: LoadedSignalInfra
     ): BlockInfra {
-        val blockInfra = internalBuildBlocks(sigModuleManager, rawSignalingInfra, loadedSignalInfra)
+        val blockInfra = internalBuildBlocks(reporter, sigModuleManager, rawSignalingInfra, loadedSignalInfra)
         for (block in blockInfra.blocks) {
             val sigSystem = blockInfra.getBlockSignalingSystem(block)
             val path = blockInfra.getBlockPath(block)

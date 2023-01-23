@@ -1,5 +1,6 @@
 package fr.sncf.osrd.signaling.impl
 
+import fr.sncf.osrd.signaling.DiagnosisReporter
 import fr.sncf.osrd.sim_infra.api.*
 import fr.sncf.osrd.sim_infra.impl.BlockInfraBuilder
 import fr.sncf.osrd.sim_infra.impl.blockInfraBuilder
@@ -11,6 +12,7 @@ import fr.sncf.osrd.utils.indexing.StaticIdx
 
 
 internal fun internalBuildBlocks(
+    diagnosisReporter: DiagnosisReporter,
     sigModuleManager: InfraSigSystemManager,
     rawSignalingInfra: RawSignalingInfra,
     loadedSignalInfra: LoadedSignalInfra
@@ -69,7 +71,7 @@ internal fun internalBuildBlocks(
                 assert(routeExitDet == rawSignalingInfra.getZonePathExit(lastZonePath))
                 if (!routeEndsAtBufferStop)
                 // TODO: properly log the route
-                    throw RuntimeException("invalid block")
+                    diagnosisReporter.err()// FIXME ("invalid block")
 
                 block(curBlock.startAtBufferStop, true, curBlock.zonePaths, curBlock.signals, curBlock.signalPositions)
             }

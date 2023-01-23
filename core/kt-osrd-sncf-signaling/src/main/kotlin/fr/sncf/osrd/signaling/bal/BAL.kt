@@ -19,10 +19,10 @@ object BAL : SignalingSystemDriver {
     override fun checkBlock(reporter: DiagnosisReporter, block: SigBlock) {
         // Check that we have the correct number of signals
         if (block.startsAtBufferStop || block.stopsAtBufferStop) {
-            assert(block.signalTypes.size == 1)
+           assert(block.signalTypes.size == 1)
         }
         else {
-            assert(block.signalTypes.size == 2)
+           assert(block.signalTypes.size == 2)
         }
     }
 }
