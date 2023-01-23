@@ -24,7 +24,7 @@ import Map from 'applications/osrd/views/OSRDSimulation/Map';
 import OSRDSignalSwitch from 'applications/osrd/components/Simulation/SignalSwitch/withOSRDData';
 import { Rnd } from 'react-rnd';
 import SpaceCurvesSlopes from 'applications/osrd/views/OSRDSimulation/SpaceCurvesSlopes';
-import SpaceTimeChart from 'applications/osrd/views/OSRDSimulation/SpaceTimeChart';
+import SpaceTimeChart from 'applications/osrd/components/Simulation/SpaceTimeChart/withOSRDData';
 import SpeedSpaceChart from 'applications/osrd/components/Simulation/SpeedSpaceChart/withOSRDData';
 import TimeButtons from 'applications/osrd/views/OSRDSimulation/TimeButtons';
 import TimeLine from 'applications/osrd/components/TimeLine/TimeLine';
