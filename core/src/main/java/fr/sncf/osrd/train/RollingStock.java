@@ -168,7 +168,7 @@ public class RollingStock implements PhysicsRollingStock {
         AC,
     }
 
-    private record ConditionAndCurve(PhysicsPath.ModeAndProfile modeAndProfile, TractiveEffortPoint[] curve) {
+    protected record ConditionAndCurve(PhysicsPath.ModeAndProfile modeAndProfile, TractiveEffortPoint[] curve) {
     }
 
     /**
@@ -186,7 +186,7 @@ public class RollingStock implements PhysicsRollingStock {
     /**
      * Returns the tractive effort curve that matches best, along with the condition that matched
      */
-    private ConditionAndCurve findTractiveEffortCurve(String catenaryMode, String electricalProfile,
+    protected ConditionAndCurve findTractiveEffortCurve(String catenaryMode, String electricalProfile,
                                                       Comfort comfort) {
         // Get mode effort curves
         var mode = modes.get(defaultMode);

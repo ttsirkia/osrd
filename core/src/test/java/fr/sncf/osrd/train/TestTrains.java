@@ -145,7 +145,11 @@ public class TestTrains {
                                 new RollingStock.EffortCurveConditions(RollingStock.Comfort.HEATING, null)
                         }, "25000", new RollingStock.EffortCurveConditions[]{
                                 new RollingStock.EffortCurveConditions(RollingStock.Comfort.AC, "25000"),
-                                new RollingStock.EffortCurveConditions(RollingStock.Comfort.HEATING, "25000")
+                                new RollingStock.EffortCurveConditions(RollingStock.Comfort.HEATING, "25000"),
+                                new RollingStock.EffortCurveConditions(RollingStock.Comfort.STANDARD, "25000"),
+                                new RollingStock.EffortCurveConditions(RollingStock.Comfort.AC, "22500"),
+                                new RollingStock.EffortCurveConditions(RollingStock.Comfort.HEATING, "22500"),
+                                new RollingStock.EffortCurveConditions(RollingStock.Comfort.STANDARD, "22500")
                         }, "1500", new RollingStock.EffortCurveConditions[]{
                                 new RollingStock.EffortCurveConditions(RollingStock.Comfort.AC, "O"),
                                 new RollingStock.EffortCurveConditions(RollingStock.Comfort.HEATING, "O")
