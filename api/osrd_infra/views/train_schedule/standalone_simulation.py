@@ -90,6 +90,8 @@ def process_simulation_response(infra: Infra, train_schedules: List[TrainSchedul
     speed_limits = response_payload["speed_limits"]
     assert len(train_schedules) == len(speed_limits)
     eco_simulations = response_payload["eco_simulations"]
+    modes_and_profiles = response_payload["modes_and_profiles"]
+    assert len(modes_and_profiles) == 0 or len(train_schedules) == len(modes_and_profiles)
 
     stops = train_schedules[0].path.payload["path_waypoints"]
     ops_tracks = TrackSectionModel.objects.filter(infra=infra, obj_id__in=[stop["track"] for stop in stops])
@@ -111,6 +113,8 @@ def process_simulation_response(infra: Infra, train_schedules: List[TrainSchedul
 
         train_schedule.base_simulation = base_simulations[i]
         train_schedule.mrsp = speed_limits[i]
+        if len(modes_and_profiles) > 0:
+            train_schedule.modes_and_profiles = modes_and_profiles[i]
 
         # Skip if no eco simulation is available
         if not eco_simulations[i]:

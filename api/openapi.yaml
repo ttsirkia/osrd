@@ -1093,6 +1093,29 @@ components:
             - type: object
               properties:
                 error: { type: string }
+        modes_and_profiles:
+          type: array
+          items:
+            description: The catenary mode and electrical profiles seen along the path. Each zone ends where the next starts. mode_seen and profile_seen are filled only if they differ from those used.
+            type: array
+            items:
+              type: object
+              properties:
+                start:
+                  type: number
+                  format: double
+                mode_used:
+                  type: string
+                profile_used:
+                  type: string
+                  nullable: true
+                mode_seen:
+                  type: string
+                  nullable: true
+                profile_seen:
+                  type: string
+                  nullable: true
+
     PathQuery:
       properties:
         infra:

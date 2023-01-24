@@ -22,3 +22,4 @@ class TrainScheduleModel(models.Model):
     comfort = models.CharField(
         max_length=8, choices=[(x.value, x.name) for x in ComfortType], default=ComfortType.STANDARD
     )
+    modes_and_profiles = models.JSONField(default=[])
