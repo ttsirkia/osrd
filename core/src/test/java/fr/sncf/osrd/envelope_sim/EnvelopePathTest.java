@@ -33,10 +33,10 @@ public class EnvelopePathTest {
     }
 
     @Test
-    void getCatenaryProfile() {
+    void getCatenaryMode() {
         var path = new EnvelopePath(10, new double[] { 0, 10 }, new double[] { 0 },
                 ImmutableRangeMap.of(Range.closed(3., 7.), "1500"));
-        var profileMap = path.getCatenaryProfileMap();
+        var profileMap = path.getCatenaryModeMap();
         assertNull(profileMap.get(1.));
         assertNull(profileMap.get(8.));
         assertEquals("1500", profileMap.get(4.));

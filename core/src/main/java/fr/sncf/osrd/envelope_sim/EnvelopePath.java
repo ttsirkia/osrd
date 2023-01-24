@@ -14,8 +14,8 @@ public class EnvelopePath implements PhysicsPath {
     private final double[] gradeValues;
     /** The cumulative sum of the gradient at each grade position */
     private final double[] gradeCumSum;
-    /** Catenary profiles ranges */
-    private final ImmutableRangeMap<Double, String> catenaryProfiles;
+    /** Catenary modes ranges */
+    private final ImmutableRangeMap<Double, String> catenaryModes;
 
     /**
      * Creates a new envelope path, which can be used to perform envelope simulations.
@@ -23,14 +23,14 @@ public class EnvelopePath implements PhysicsPath {
      * @param length                   the length of the path
      * @param gradePositions           the points at which the grade (slope) changes
      * @param gradeValues              the values between consecutive pairs of grade positions
-     * @param catenaryProfiles         range map of catenary profiles
+     * @param catenaryModes            range map of catenary modes
      */
     @SuppressFBWarnings({"EI_EXPOSE_REP2"})
     public EnvelopePath(
             double length,
             double[] gradePositions,
             double[] gradeValues,
-            ImmutableRangeMap<Double, String> catenaryProfiles
+            ImmutableRangeMap<Double, String> catenaryModes
     ) {
         assert gradePositions.length == gradeValues.length + 1;
         assert gradePositions[0] == 0.0;
@@ -41,7 +41,7 @@ public class EnvelopePath implements PhysicsPath {
         this.gradeValues = gradeValues;
         this.length = length;
         this.gradeCumSum = initCumSum(gradePositions, gradeValues);
-        this.catenaryProfiles = catenaryProfiles;
+        this.catenaryModes = catenaryModes;
     }
 
     private double[] initCumSum(double[] gradePositions, double[] gradeValues) {
@@ -98,7 +98,7 @@ public class EnvelopePath implements PhysicsPath {
     }
 
     @Override
-    public RangeMap<Double, String> getCatenaryProfileMap() {
-        return catenaryProfiles;
+    public RangeMap<Double, String> getCatenaryModeMap() {
+        return catenaryModes;
     }
 }
