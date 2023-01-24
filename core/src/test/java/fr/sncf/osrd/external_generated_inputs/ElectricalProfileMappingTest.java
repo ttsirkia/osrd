@@ -8,17 +8,16 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ElectricalProfileMappingTest {
     public static void verifyProfileMap(ElectricalProfileMapping profileMap) {
         assertNotEquals(0, profileMap.mapping.size());
-        for (var entry : profileMap.mapping.entrySet()) {
-            var trackSection = entry.getKey();
-            var profile = entry.getValue();
-            assertNotNull(profile);
-            assertNotEquals(0, profile.asMapOfRanges().size());
+        for (var byTrack : profileMap.mapping.entrySet()) {
+            assertNotEquals(0, byTrack.getValue().size());
+            for (var byRange : byTrack.getValue().entrySet()) {
+                assertNotEquals(0, byRange.getValue().asMapOfRanges().size());
+            }
         }
     }
 
@@ -33,5 +32,6 @@ public class ElectricalProfileMappingTest {
         profileMap.parseRJS(profiles, infra);
 
         verifyProfileMap(profileMap);
+        assertEquals(5, profileMap.mapping.size()); // 5 power classes
     }
 }
