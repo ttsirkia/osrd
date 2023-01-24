@@ -62,7 +62,7 @@ public class ElectricalProfileSetManager extends MiddleWareInteraction {
                     cacheEntry.mapping = mapping;
                     cacheEntry.status = CacheEntryStatus.CACHED;
                 } catch (IOException | UnexpectedHttpResponse | JsonDataException e) {
-                    logger.error("failed to fetch electrical profile set", e);
+                    logger.error("failed to get electrical profile set", e);
                     cacheEntry.status = CacheEntryStatus.ERROR;
                 }
             }

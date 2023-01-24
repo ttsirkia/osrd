@@ -39,9 +39,16 @@ public class ApiTest {
         var url = request.url().toString();
         var matcher = Pattern.compile(regex).matcher(url);
         if (matcher.matches()) {
-            return Files.readString(Paths.get(Helpers.getResourcePath(matcher.group(1)).toUri()));
+            try {
+                var path = matcher.group(1);
+                return Files.readString(Paths.get(Helpers.getResourcePath(path).toUri()));
+            } catch (IOException e) {
+                throw new IOException("Failed to read mock file", e);
+            } catch (AssertionError e) {
+                return ""; // If we can't find the file we return an empty string
+            }
         }
-        throw new RuntimeException("Could not find an infra path in the given url");
+        throw new RuntimeException("Could not parse the given url");
     }
 
     /**

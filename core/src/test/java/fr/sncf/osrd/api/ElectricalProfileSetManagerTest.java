@@ -15,4 +15,12 @@ public class ElectricalProfileSetManagerTest extends ApiTest {
         assert profileMap.isPresent();
         verifyProfileMap(profileMap.get());
     }
+
+    @Test
+    public void testGetProfileMapInvalid() {
+        var profileMap =
+                electricalProfileSetManagerMock.getProfileMap("small_infra/invalid.json");
+
+        assert profileMap.isEmpty();
+    }
 }

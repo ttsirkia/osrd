@@ -21,4 +21,10 @@ public class RJSElectricalProfile {
 
     @Json(name = "track_ranges")
     public List<RJSTrackRange> trackRanges;
+
+    public RJSElectricalProfile(String value, String powerClass, List<RJSTrackRange> trackRanges) {
+        this.value = value;
+        this.powerClass = powerClass;
+        this.trackRanges = trackRanges;
+    }
 }
