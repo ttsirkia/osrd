@@ -38,6 +38,8 @@ import java.util.List;
 public class StandaloneSimulationEndpoint implements Take {
     private final InfraManager infraManager;
 
+    private final ElectricalProfileSetManager electricalProfileSetManager;
+
     public static final JsonAdapter<StandaloneSimulationRequest> adapterRequest = new Moshi
             .Builder()
             .add(ID.Adapter.FACTORY)
@@ -47,8 +49,9 @@ public class StandaloneSimulationEndpoint implements Take {
             .build()
             .adapter(StandaloneSimulationRequest.class);
 
-    public StandaloneSimulationEndpoint(InfraManager infraManager) {
+    public StandaloneSimulationEndpoint(InfraManager infraManager, ElectricalProfileSetManager electricalProfileSetManager) {
         this.infraManager = infraManager;
+        this.electricalProfileSetManager = electricalProfileSetManager;
     }
 
     @Override
@@ -65,6 +68,9 @@ public class StandaloneSimulationEndpoint implements Take {
 
             // load infra
             var infra = infraManager.load(request.infra, request.expectedVersion, recorder);
+
+            // load electrical profile set
+            var electricalProfileMap = electricalProfileSetManager.getProfileMap(request.electricalProfileSet, infra);
 
             // Parse rolling stocks
             var rollingStocks = new HashMap<String, RollingStock>();
@@ -102,6 +108,9 @@ public class StandaloneSimulationEndpoint implements Take {
         /** Infra id */
         public String infra;
 
+        /** Electrical profile set id */
+        public String electricalProfileSet;
+
         /** Infra version */
         @Json(name = "expected_version")
         public String expectedVersion;
@@ -125,6 +134,7 @@ public class StandaloneSimulationEndpoint implements Take {
         /** Create a default SimulationRequest */
         public StandaloneSimulationRequest() {
             infra = null;
+            electricalProfileSet = null;
             expectedVersion = null;
             timeStep = 2.0;
             rollingStocks = null;
@@ -132,7 +142,7 @@ public class StandaloneSimulationEndpoint implements Take {
             trainsPath = null;
         }
 
-        /** Create SimulationRequest */
+        /** Create SimulationRequest without electrical profiles */
         public StandaloneSimulationRequest(
                 String infra,
                 String expectedVersion,
@@ -142,6 +152,26 @@ public class StandaloneSimulationEndpoint implements Take {
                 RJSTrainPath trainsPath
         ) {
             this.infra = infra;
+            this.electricalProfileSet = null;
+            this.expectedVersion = expectedVersion;
+            this.timeStep = timeStep;
+            this.rollingStocks = rollingStocks;
+            this.trainSchedules = trainSchedules;
+            this.trainsPath = trainsPath;
+        }
+
+        /** Create SimulationRequest with electrical profiles */
+        public StandaloneSimulationRequest(
+                String infra,
+                String electricalProfileSet,
+                String expectedVersion,
+                double timeStep,
+                List<RJSRollingStock> rollingStocks,
+                List<RJSStandaloneTrainSchedule> trainSchedules,
+                RJSTrainPath trainsPath
+        ) {
+            this.infra = infra;
+            this.electricalProfileSet = electricalProfileSet;
             this.expectedVersion = expectedVersion;
             this.timeStep = timeStep;
             this.rollingStocks = rollingStocks;
