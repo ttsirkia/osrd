@@ -43,7 +43,7 @@ class StandaloneSimulationTest extends ApiTest {
         return trainPath;
     }
 
-    public static StandaloneSimResult runStandaloneSimulation(StandaloneSimulationRequest request) throws
+    public StandaloneSimResult runStandaloneSimulation(StandaloneSimulationRequest request) throws
             InvalidRollingStock,
             InvalidSchedule,
             IOException {
@@ -51,7 +51,8 @@ class StandaloneSimulationTest extends ApiTest {
         var requestBody = StandaloneSimulationEndpoint.adapterRequest.toJson(request);
 
         // process it
-        var rawResponse = readBodyResponse(new StandaloneSimulationEndpoint(infraHandlerMock)
+        var rawResponse = readBodyResponse(new StandaloneSimulationEndpoint(infraHandlerMock,
+                electricalProfileSetManagerMock)
                 .act(new RqFake("POST", "/standalone_simulation", requestBody))
         );
 

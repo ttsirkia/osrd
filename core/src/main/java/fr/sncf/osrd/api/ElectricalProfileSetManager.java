@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ElectricalProfileSetManager extends MiddleWareInteraction {
     private final ConcurrentHashMap<String, IdentityHashMap<TrackSection, RangeMap<Double, String>>> cache =
             new ConcurrentHashMap<>();
-    static final Logger logger = LoggerFactory.getLogger(ElectricalProfileSetManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ElectricalProfileSetManager.class);
 
     public ElectricalProfileSetManager(String baseUrl, String authorizationToken, OkHttpClient client) {
         super(baseUrl, authorizationToken, client);
@@ -29,12 +29,18 @@ public class ElectricalProfileSetManager extends MiddleWareInteraction {
     private BufferedSource fetchProfileSet(String profileSetId) throws IOException, UnexpectedHttpResponse {
         var endpointPath = String.format("/electrical_profile_set/%s/", profileSetId);
         var request = buildRequest(endpointPath);
-        var response = httpClient.newCall(request).execute();
-        if (!response.isSuccessful()) throw new UnexpectedHttpResponse(response);
-        return response.body().source();
+        try {
+            var response = httpClient.newCall(request).execute();
+            if (!response.isSuccessful())
+                throw new UnexpectedHttpResponse(response);
+            return response.body().source();
+        } catch (IOException e) {
+            logger.error("Failed to fetch profile set {}", profileSetId, e);
+            throw e;
+        }
     }
 
-    private void parseRJS(List<RJSElectricalProfile> rjsProfiles,
+    protected void parseRJS(List<RJSElectricalProfile> rjsProfiles,
                           TrackInfra infra,
                           IdentityHashMap<TrackSection, RangeMap<Double, String>> cache) {
         for (var rjsProfile : rjsProfiles) {
@@ -51,18 +57,23 @@ public class ElectricalProfileSetManager extends MiddleWareInteraction {
      */
     public IdentityHashMap<TrackSection, RangeMap<Double, String>> getProfileMap(String profileSetId,
                                                                                  TrackInfra infra) {
-        if (profileSetId == null)
+        if (profileSetId == null) {
             return new IdentityHashMap<>();
-        if (cache.containsKey(profileSetId))
+        } else if (cache.containsKey(profileSetId)) {
+            logger.info("Electrical profile set {} is already cached", profileSetId);
             return cache.get(profileSetId);
+        }
 
         cache.put(profileSetId, new IdentityHashMap<>());
         var cacheEntry = cache.get(profileSetId);
 
         synchronized (cacheEntry) {
             try {
+                logger.info("Electrical profile set {} is not cached, fetching it", profileSetId);
                 var rjsProfiles = RJSElectricalProfile.listAdapter.fromJson(fetchProfileSet(profileSetId));
+                logger.info("Electrical profile set {} fetched, parsing it", profileSetId);
                 parseRJS(rjsProfiles, infra, cacheEntry);
+                logger.info("Electrical profile set {} parsed", profileSetId);
             } catch (IOException | UnexpectedHttpResponse e) {
                 logger.error("failed to fetch electrical profile set", e);
                 cacheEntry.clear();
