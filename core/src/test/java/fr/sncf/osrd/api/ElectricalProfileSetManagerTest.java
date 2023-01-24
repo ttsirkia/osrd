@@ -1,17 +1,9 @@
 package fr.sncf.osrd.api;
 
-import com.google.common.collect.RangeMap;
-import fr.sncf.osrd.Helpers;
-import fr.sncf.osrd.infra.api.tracks.undirected.TrackSection;
 import fr.sncf.osrd.reporting.warnings.DiagnosticRecorderImpl;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.IdentityHashMap;
-
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static fr.sncf.osrd.external_generated_inputs.ElectricalProfileMappingTest.verifyProfileMap;
 
 public class ElectricalProfileSetManagerTest extends ApiTest {
     public static void verifyProfileMap(IdentityHashMap<TrackSection, RangeMap<Double, String>> profileMap) {
