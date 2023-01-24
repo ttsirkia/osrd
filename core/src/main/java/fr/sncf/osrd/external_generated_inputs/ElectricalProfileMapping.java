@@ -5,7 +5,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import fr.sncf.osrd.infra_state.api.TrainPath;
-import fr.sncf.osrd.railjson.schema.RJSElectricalProfile;
+import fr.sncf.osrd.railjson.schema.external_generated_inputs.RJSElectricalProfile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;

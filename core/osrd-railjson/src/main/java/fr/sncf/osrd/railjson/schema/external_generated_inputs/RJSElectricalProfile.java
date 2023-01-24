@@ -1,4 +1,4 @@
-package fr.sncf.osrd.railjson.schema;
+package fr.sncf.osrd.railjson.schema.external_generated_inputs;
 
 import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonAdapter;

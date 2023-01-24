@@ -2,7 +2,7 @@ package fr.sncf.osrd.api;
 
 import com.squareup.moshi.JsonDataException;
 import fr.sncf.osrd.external_generated_inputs.ElectricalProfileMapping;
-import fr.sncf.osrd.railjson.schema.RJSElectricalProfile;
+import fr.sncf.osrd.railjson.schema.external_generated_inputs.RJSElectricalProfile;
 import okhttp3.OkHttpClient;
 import okio.BufferedSource;
 import org.slf4j.Logger;
