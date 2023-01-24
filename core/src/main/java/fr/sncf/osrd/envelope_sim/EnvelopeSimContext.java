@@ -9,6 +9,7 @@ public class EnvelopeSimContext {
     public final PhysicsPath path;
     public final double timeStep;
     public final RangeMap<Double, PhysicsRollingStock.TractiveEffortPoint[]> tractiveEffortCurveMap;
+    public final RangeMap<Double, PhysicsPath.ModeAndProfile> modeAndProfilesUsed;
 
     /** Creates a context suitable to run simulations on envelopes */
     public EnvelopeSimContext(
@@ -20,6 +21,8 @@ public class EnvelopeSimContext {
         this.rollingStock = rollingStock;
         this.path = path;
         this.timeStep = timeStep;
-        this.tractiveEffortCurveMap = rollingStock.mapTractiveEffortCurves(path, comfort);
+        var curvesAndConditions = rollingStock.mapTractiveEffortCurves(path, comfort);
+        this.tractiveEffortCurveMap = curvesAndConditions.curves();
+        this.modeAndProfilesUsed = curvesAndConditions.conditions();
     }
 }

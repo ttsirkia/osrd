@@ -123,8 +123,7 @@ class EnvelopePartTest {
             double expectedEnvelopePartEnergy;
             switch (i) {
                 case 0:
-                    expectedEnvelopePartEnergy = PhysicsRollingStock.getMaxEffort(1,
-                            testRollingStock.getTractiveEffortCurve(null, null, RollingStock.Comfort.STANDARD))
+                    expectedEnvelopePartEnergy = testRollingStock.getMaxEffort(null, null, RollingStock.Comfort.STANDARD, 1)
                             * envelopePart.getTotalTimeMS() / 1000;
                     break;
                 case 1:
