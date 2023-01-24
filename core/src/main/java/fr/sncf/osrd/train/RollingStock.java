@@ -152,10 +152,14 @@ public class RollingStock implements PhysicsRollingStock {
     }
 
     public record EffortCurveConditions(Comfort comfort, String electricalProfile) {
+
+        /**
+         * Returns true if the conditions are met
+         * If comfort condition is null then it matches any comfort, same for electrical profile
+         */
         public boolean match(Comfort comfort, String electricalProfile) {
-            // If comfort condition is null then it matches any comfort, same for electrical profile
-            return (this.comfort == null || comfort == this.comfort) &&
-                    (this.electricalProfile == null || electricalProfile.equals(this.electricalProfile));
+            return (this.comfort == null || comfort == this.comfort)
+                    && (this.electricalProfile == null || electricalProfile.equals(this.electricalProfile));
         }
     }
 
@@ -173,9 +177,10 @@ public class RollingStock implements PhysicsRollingStock {
     }
 
     /**
-     * Given a catenary mode and a comfort lookup for the best tractive effort curve
+     * Given a catenary mode, an electrical profile and a comfort lookup for the best tractive effort curve
      */
-    private TractiveEffortPoint[] getTractiveEffortCurve(String catenaryMode, Comfort comfort) {
+    public TractiveEffortPoint[] getTractiveEffortCurve(String catenaryMode, String electricalProfile,
+                                                        Comfort comfort) {
         // Get mode effort curves
         var mode = modes.get(defaultMode);
         if (catenaryMode != null && modes.containsKey(catenaryMode))
@@ -183,7 +188,7 @@ public class RollingStock implements PhysicsRollingStock {
 
         // Get best curve given a comfort
         for (var condCurve : mode.curves) {
-            if (condCurve.cond.match(comfort, null)) {
+            if (condCurve.cond.match(comfort, electricalProfile)) {
                 return condCurve.curve;
             }
         }
@@ -193,30 +198,19 @@ public class RollingStock implements PhysicsRollingStock {
     /**
      * Returns the tractive effort curves for the train along the given path.
      *
-     * @param path The path to get the curves for
+     * @param path    The path to get the curves for
      * @param comfort The comfort level to get the curves for
      */
 
     public ImmutableRangeMap<Double, TractiveEffortPoint[]> mapTractiveEffortCurves(PhysicsPath path, Comfort comfort) {
         TreeRangeMap<Double, TractiveEffortPoint[]> res = TreeRangeMap.create();
-        res.put(Range.all(), getTractiveEffortCurve(defaultMode, comfort));
-        for (var catenaryModeEntry : path.getCatenaryModeMap().asMapOfRanges().entrySet()) {
-            var catenaryMode = catenaryModeEntry.getValue();
-            var curve = getTractiveEffortCurve(catenaryMode, comfort);
-            res.put(catenaryModeEntry.getKey(), curve);
+        res.put(Range.all(), getTractiveEffortCurve(defaultMode, null, comfort));
+        for (var modeAndProfileEntry : path.getModeAndProfileMap(powerClass).asMapOfRanges().entrySet()) {
+            var modeAndProfile = modeAndProfileEntry.getValue();
+            var curve = getTractiveEffortCurve(modeAndProfile.mode(), modeAndProfile.profile(), comfort);
+            res.put(modeAndProfileEntry.getKey(), curve);
         }
         return ImmutableRangeMap.copyOf(res);
-    }
-
-    /**
-     * Returns the max tractive effort at a given speed.
-     *
-     * @param speed the speed to compute the max tractive effort for
-     * @param catenaryMode the catenary mode concerned
-     * @return the max tractive effort
-     */
-    public double getMaxEffort(double speed, String catenaryMode, Comfort comfort) {
-        return PhysicsRollingStock.getMaxEffort(speed, getTractiveEffortCurve(catenaryMode, comfort));
     }
 
     public Set<String> getModeNames() {

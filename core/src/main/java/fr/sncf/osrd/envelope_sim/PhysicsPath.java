@@ -19,5 +19,7 @@ public interface PhysicsPath {
     double findHighGradePosition(double position, double endPos, double length, double gradeThreshold);
 
     /** The catenary modes on a given position of the path */
-    RangeMap<Double, String> getCatenaryModeMap();
+    RangeMap<Double, ModeAndProfile> getModeAndProfileMap(String powerClass);
+
+    record ModeAndProfile(String mode, String profile) {}
 }

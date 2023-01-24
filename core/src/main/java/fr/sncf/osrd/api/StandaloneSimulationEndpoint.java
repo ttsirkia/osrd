@@ -32,6 +32,7 @@ import org.takes.rs.RsWithBody;
 import org.takes.rs.RsWithStatus;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -49,7 +50,8 @@ public class StandaloneSimulationEndpoint implements Take {
             .build()
             .adapter(StandaloneSimulationRequest.class);
 
-    public StandaloneSimulationEndpoint(InfraManager infraManager, ElectricalProfileSetManager electricalProfileSetManager) {
+    public StandaloneSimulationEndpoint(InfraManager infraManager,
+                                        ElectricalProfileSetManager electricalProfileSetManager) {
         this.infraManager = infraManager;
         this.electricalProfileSetManager = electricalProfileSetManager;
     }
@@ -70,27 +72,36 @@ public class StandaloneSimulationEndpoint implements Take {
             var infra = infraManager.load(request.infra, request.expectedVersion, recorder);
 
             // load electrical profile set
-            var electricalProfileMap = electricalProfileSetManager.getProfileMap(request.electricalProfileSet, infra);
+            var electricalProfileMap = electricalProfileSetManager.getProfileMap(request.electricalProfileSet);
 
             // Parse rolling stocks
+            var powerClasses = new HashSet<String>();
             var rollingStocks = new HashMap<String, RollingStock>();
-            for (var rjsRollingStock : request.rollingStocks)
+            for (var rjsRollingStock : request.rollingStocks) {
                 rollingStocks.put(rjsRollingStock.getID(), RJSRollingStockParser.parse(rjsRollingStock));
+                powerClasses.add(rjsRollingStock.powerClass);
+            }
 
-            // Parse trainsPath
-            var trainsPath = TrainPathBuilder.from(infra, request.trainsPath);
-            var envelopePath = EnvelopeTrainPath.from(trainsPath);
+            // Parse trainPath
+            var trainPath = TrainPathBuilder.from(infra, request.trainsPath);
+            var envelopePath = EnvelopeTrainPath.from(trainPath);
+
+            if (electricalProfileMap.isPresent()) {
+                envelopePath.setElectricalProfiles(
+                        electricalProfileMap.get().getProfilesOnPath(trainPath, powerClasses));
+            }
 
             // Parse train schedules
             var trainSchedules = new ArrayList<StandaloneTrainSchedule>();
             for (var rjsTrainSchedule : request.trainSchedules)
                 trainSchedules.add(RJSStandaloneTrainScheduleParser.parse(
-                        infra, request.timeStep, rollingStocks::get, rjsTrainSchedule, trainsPath, envelopePath));
+                        infra, request.timeStep, rollingStocks::get, rjsTrainSchedule, trainPath, envelopePath));
 
             // Compute envelopes and extract metadata
             var result = StandaloneSim.run(
                     infra,
-                    trainsPath,
+                    trainPath,
+                    envelopePath,
                     trainSchedules,
                     request.timeStep
             );
@@ -105,33 +116,50 @@ public class StandaloneSimulationEndpoint implements Take {
 
     @SuppressFBWarnings("URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD")
     public static final class StandaloneSimulationRequest {
-        /** Infra id */
+        /**
+         * Infra id
+         */
         public String infra;
 
-        /** Electrical profile set id */
+        /**
+         * Electrical profile set id
+         */
+        @Json(name = "electrical_profile_set")
         public String electricalProfileSet;
 
-        /** Infra version */
+        /**
+         * Infra version
+         */
         @Json(name = "expected_version")
         public String expectedVersion;
 
-        /** The time step which shall be used for all simulations */
+        /**
+         * The time step which shall be used for all simulations
+         */
         @Json(name = "time_step")
         public double timeStep;
 
-        /** A list of rolling stocks involved in this simulation */
+        /**
+         * A list of rolling stocks involved in this simulation
+         */
         @Json(name = "rolling_stocks")
         public List<RJSRollingStock> rollingStocks;
 
-        /** A list of trains plannings */
+        /**
+         * A list of trains plannings
+         */
         @Json(name = "train_schedules")
         public List<RJSStandaloneTrainSchedule> trainSchedules;
 
-        /** The path used by trains */
+        /**
+         * The path used by trains
+         */
         @Json(name = "trains_path")
         public RJSTrainPath trainsPath;
 
-        /** Create a default SimulationRequest */
+        /**
+         * Create a default SimulationRequest
+         */
         public StandaloneSimulationRequest() {
             infra = null;
             electricalProfileSet = null;
@@ -142,7 +170,9 @@ public class StandaloneSimulationEndpoint implements Take {
             trainsPath = null;
         }
 
-        /** Create SimulationRequest without electrical profiles */
+        /**
+         * Create SimulationRequest without electrical profiles
+         */
         public StandaloneSimulationRequest(
                 String infra,
                 String expectedVersion,
@@ -160,7 +190,9 @@ public class StandaloneSimulationEndpoint implements Take {
             this.trainsPath = trainsPath;
         }
 
-        /** Create SimulationRequest with electrical profiles */
+        /**
+         * Create SimulationRequest with electrical profiles
+         */
         public StandaloneSimulationRequest(
                 String infra,
                 String electricalProfileSet,
