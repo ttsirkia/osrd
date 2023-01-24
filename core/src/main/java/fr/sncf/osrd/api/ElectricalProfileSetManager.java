@@ -1,18 +1,18 @@
 package fr.sncf.osrd.api;
 
-import fr.sncf.osrd.infra.api.tracks.undirected.TrackInfra;
+import com.squareup.moshi.JsonDataException;
 import fr.sncf.osrd.external_generated_inputs.ElectricalProfileMapping;
 import fr.sncf.osrd.railjson.schema.RJSElectricalProfile;
 import okhttp3.OkHttpClient;
 import okio.BufferedSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ElectricalProfileSetManager extends MiddleWareInteraction {
-    private final ConcurrentHashMap<String, ElectricalProfileMapping> cache =
+    private final ConcurrentHashMap<String, CacheEntry> cache =
             new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(ElectricalProfileSetManager.class);
 
@@ -27,7 +27,10 @@ public class ElectricalProfileSetManager extends MiddleWareInteraction {
             var response = httpClient.newCall(request).execute();
             if (!response.isSuccessful())
                 throw new UnexpectedHttpResponse(response);
-            return response.body().source();
+            var body = response.body();
+            if (body == null)
+                throw new JsonDataException("empty response body");
+            return body.source();
         } catch (IOException e) {
             logger.error("Failed to fetch profile set {}", profileSetId, e);
             throw e;
@@ -37,30 +40,52 @@ public class ElectricalProfileSetManager extends MiddleWareInteraction {
     /**
      * Get a mapping from track sections to electrical profile value, given an electrical profile set id
      */
-    public ElectricalProfileMapping getProfileMap(String profileSetId,
-                                                  TrackInfra infra) {
+    public Optional<ElectricalProfileMapping> getProfileMap(String profileSetId) {
         if (profileSetId == null) {
-            return new ElectricalProfileMapping();
-        } else if (cache.containsKey(profileSetId)) {
-            logger.info("Electrical profile set {} is already cached", profileSetId);
-            return cache.get(profileSetId);
+            return Optional.empty();
         }
 
-        cache.put(profileSetId, new ElectricalProfileMapping());
+        cache.putIfAbsent(profileSetId, new CacheEntry(null));
         var cacheEntry = cache.get(profileSetId);
 
-        synchronized (cacheEntry) {
-            try {
-                logger.info("Electrical profile set {} is not cached, fetching it", profileSetId);
-                var rjsProfiles = RJSElectricalProfile.listAdapter.fromJson(fetchProfileSet(profileSetId));
-                logger.info("Electrical profile set {} fetched, parsing it", profileSetId);
-                cacheEntry.parseRJS(rjsProfiles, infra);
-                logger.info("Electrical profile set {} parsed", profileSetId);
-            } catch (IOException | UnexpectedHttpResponse e) {
-                logger.error("failed to fetch electrical profile set", e);
-                cacheEntry.clear();
+        if (cacheEntry.status == CacheEntryStatus.INITIALIZING) {
+            synchronized (cacheEntry) {
+                try {
+                    logger.info("Electrical profile set {} is not cached, fetching it", profileSetId);
+                    var rjsProfiles = RJSElectricalProfile.listAdapter.fromJson(fetchProfileSet(profileSetId));
+                    if (rjsProfiles == null)
+                        throw new JsonDataException("Could not parse electrical profile set JSON");
+                    logger.info("Electrical profile set {} fetched, parsing it", profileSetId);
+                    var mapping = new ElectricalProfileMapping();
+                    mapping.parseRJS(rjsProfiles);
+                    logger.info("Electrical profile set {} parsed", profileSetId);
+                    cacheEntry.mapping = mapping;
+                    cacheEntry.status = CacheEntryStatus.CACHED;
+                } catch (IOException | UnexpectedHttpResponse | JsonDataException e) {
+                    logger.error("failed to fetch electrical profile set", e);
+                    cacheEntry.status = CacheEntryStatus.ERROR;
+                }
             }
         }
-        return cacheEntry;
+
+        if (cacheEntry.status == CacheEntryStatus.CACHED)
+            return Optional.of(cacheEntry.mapping);
+        return Optional.empty();
+    }
+
+    public enum CacheEntryStatus {
+        INITIALIZING,
+        CACHED,
+        ERROR;
+    }
+
+    private static class CacheEntry {
+        private CacheEntryStatus status;
+        private ElectricalProfileMapping mapping;
+
+        public CacheEntry(ElectricalProfileMapping mapping) {
+            this.mapping = mapping;
+            this.status = CacheEntryStatus.INITIALIZING;
+        }
     }
 }
