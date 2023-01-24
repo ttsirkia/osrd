@@ -89,6 +89,7 @@ public class RollingStock implements PhysicsRollingStock {
     protected final Map<String, ModeEffortCurves> modes;
 
     private final String defaultMode;
+    public final String powerClass;
 
     @Override
     public double getMass() {
@@ -150,11 +151,11 @@ public class RollingStock implements PhysicsRollingStock {
     public record ConditionalEffortCurve(EffortCurveConditions cond, TractiveEffortPoint[] curve) {
     }
 
-    public record EffortCurveConditions(Comfort comfort) {
-
-        public boolean match(Comfort comfort) {
-            // If comfort condition is null then it matches every thing
-            return this.comfort == null || comfort == this.comfort;
+    public record EffortCurveConditions(Comfort comfort, String electricalProfile) {
+        public boolean match(Comfort comfort, String electricalProfile) {
+            // If comfort condition is null then it matches any comfort, same for electrical profile
+            return (this.comfort == null || comfort == this.comfort) &&
+                    (this.electricalProfile == null || electricalProfile.equals(this.electricalProfile));
         }
     }
 
@@ -182,7 +183,7 @@ public class RollingStock implements PhysicsRollingStock {
 
         // Get best curve given a comfort
         for (var condCurve : mode.curves) {
-            if (condCurve.cond.match(comfort)) {
+            if (condCurve.cond.match(comfort, null)) {
                 return condCurve.curve;
             }
         }
@@ -251,7 +252,8 @@ public class RollingStock implements PhysicsRollingStock {
             GammaType gammaType,
             RJSLoadingGaugeType loadingGaugeType,
             Map<String, ModeEffortCurves> modes,
-            String defaultMode
+            String defaultMode,
+            String powerClass
     ) {
         this.id = id;
         this.A = a;
@@ -270,5 +272,6 @@ public class RollingStock implements PhysicsRollingStock {
         this.defaultMode = defaultMode;
         this.inertia = mass * inertiaCoefficient;
         this.loadingGaugeType = loadingGaugeType;
+        this.powerClass = powerClass;
     }
 }
