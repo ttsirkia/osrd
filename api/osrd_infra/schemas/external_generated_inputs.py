@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
@@ -18,6 +18,12 @@ class ElectricalProfilesList(BaseModel):
     """This class is used for storage schema validation."""
 
     __root__: List[ElectricalProfile]
+
+
+class ElectricalProfileLevelOrder(BaseModel):
+    """This class is used to define how electrical profile levels compare to each others."""
+
+    __root__: Dict[str, List[str]]
 
 
 if __name__ == "__main__":
