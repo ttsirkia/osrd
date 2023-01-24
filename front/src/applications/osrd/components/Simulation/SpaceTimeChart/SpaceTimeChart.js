@@ -233,6 +233,8 @@ export default function SpaceTimeChart(props) {
     };
   }, []);
 
+  console.log(dataSimulation)
+
   return (
     <Rnd
       default={{
@@ -264,7 +266,7 @@ export default function SpaceTimeChart(props) {
           <ChartModal
             type={showModal}
             setShowModal={setShowModal}
-            trainName={dataSimulation[selectedTrain].name}
+            trainName={dataSimulation?.trains[selectedTrain]?.name}
             offsetTimeByDragging={offsetTimeByDragging}
           />
         ) : null}

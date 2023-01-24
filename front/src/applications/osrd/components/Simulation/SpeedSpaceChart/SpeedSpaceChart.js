@@ -174,8 +174,8 @@ const CHART_ID = 'SpeedSpaceChart';
       d3.select(`#${CHART_ID}`).remove();
       setChart(
         createChart(
-          CHART_ID,
           chart,
+          CHART_ID,
           resetChart,
           dataSimulation,
           rotate,

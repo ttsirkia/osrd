@@ -55,8 +55,9 @@ export default function createChart(
 
   const defineY =
     chart === undefined || reset ? defineLinear(dataSimulationLinearMax, 0.05) : chart.y;
-
-  const width = parseInt(d3select(`#container-${chartID}`).style('width'), 10);
+  console.log(`#container-${chartID}`)
+  const width = parseInt(d3select(`#container-${chartID}`)?.style('width'), 10);
+  console.log(width)
   const chartLocal = defineChart(
     width,
     heightOfSpaceTimeChart,
