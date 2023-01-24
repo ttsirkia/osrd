@@ -4,29 +4,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import enableInteractivity, {
   traceVerticalLine,
 } from 'applications/osrd/components/Simulation/enableInteractivity';
+import { Rnd } from 'react-rnd';
 import {
   handleWindowResize,
   interpolateOnTime,
   timeShiftTrain,
 } from 'applications/osrd/components/Helpers/ChartHelpers';
-import {
-  updateChart,
-  updateContextMenu,
-  updateMustRedraw,
-  updatePositionValues,
-} from 'reducers/osrdsimulation/actions';
-import { useDispatch, useSelector } from 'react-redux';
 import ORSD_GEV_SAMPLE_DATA from '../SpeedSpaceChart/sampleData';
 import { CgLoadbar } from 'react-icons/cg';
 import ChartModal from 'applications/osrd/components/Simulation/ChartModal';
 import { GiResize } from 'react-icons/gi';
 import { LIST_VALUES_NAME_SPACE_TIME } from 'applications/osrd/components/Simulation/consts';
 import PropTypes from 'prop-types';
-import { changeTrain } from 'applications/osrd/components/TrainList/TrainListHelpers';
-import createChart from 'applications/osrd/components/Simulation/SpaceTimeChart/createChart';
 import createTrain from 'applications/osrd/components/Simulation/SpaceTimeChart/createTrain';
-import drawTrain from 'applications/osrd/components/Simulation/SpaceTimeChart/drawTrain';
-import { persistentUpdateSimulation } from 'reducers/osrdsimulation/simulation';
+
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -35,6 +26,7 @@ import {
 } from 'applications/osrd/components/Simulation/SpaceTimeChart/d3Helpers';
 
 const CHART_ID = 'SpaceTimeChart';
+const CHART_MIN_HEIGHT = 200;
 /*
 const drawAxisTitle = (chart, rotate) => {
   chart.drawZone
@@ -49,7 +41,6 @@ const drawAxisTitle = (chart, rotate) => {
 */
 
 export default function SpaceTimeChart(props) {
-  const { heightOfSpaceTimeChart } = props;
   const ref = useRef();
   //const dispatch = useDispatch();
   const { t } = useTranslation(['allowances']);
@@ -60,7 +51,6 @@ export default function SpaceTimeChart(props) {
     selectedProjection,
     selectedTrain,
     timePosition,
-    consolidatedSimulation,
     simulation,
     dispatch,
     onOffsetTimeByDragging,
@@ -82,6 +72,9 @@ export default function SpaceTimeChart(props) {
   const [showModal, setShowModal] = useState('');
   const [dragOffset, setDragOffset] = useState(0);
   const [dragEnding, setDragEnding] = useState(false);
+  const [heightOfSpaceTimeChart, setHeightOfSpaceTimeChart] = useState(CHART_MIN_HEIGHT);
+  const [initialHeightOfSpaceTimeChart, setInitialHeightOfSpaceTimeChart] =
+    useState(heightOfSpaceTimeChart);
 
   const handleKey = ({ key }) => {
     if (['+', '-'].includes(key)) {
@@ -94,9 +87,14 @@ export default function SpaceTimeChart(props) {
   // Everyhing should be done by Hoc, has no direct effect on Comp behavior
   const offsetTimeByDragging = (offset) => {
     // Data preop
-    const trains = Array.from(simulation.trains);
-    trains[selectedTrain] = timeShiftTrain(trains[selectedTrain], offset);
-    onOffsetTimeByDragging(trains);
+    if (dataSimulation) {
+      // better define default props
+      const trains = Array.from(dataSimulation.trains);
+      trains[selectedTrain] = timeShiftTrain(trains[selectedTrain], offset);
+      setDataSimulation({ ...simulation, trains });
+      console.log('Call offset time dragging', offset);
+      onOffsetTimeByDragging(offset);
+    }
   };
 
   // Ok, isolated
@@ -104,130 +102,58 @@ export default function SpaceTimeChart(props) {
     d3.select(`#${CHART_ID}`).remove();
     setChart({ ...chart, x: chart.y, y: chart.x });
     setRotate(!rotate);
-    dispatchUpdateMustRedraw(true);
+    drawAllTrains(
+      false,
+      dataSimulation,
+      false,
+      chart,
+      heightOfSpaceTimeChart,
+      keyValues,
+      ref,
+      rotate,
+      dispatch,
+      CHART_ID,
+      simulation,
+      selectedTrain,
+      positionValues,
+      setChart,
+      setResetChart,
+      setYPosition,
+      setZoomLevel,
+      setDragEnding,
+      setDragOffset,
+      yPosition,
+      zoomLevel,
+      selectedProjection,
+      dispatchUpdateMustRedraw,
+      dispatchUpdateChart,
+      dispatchUpdateContextMenu,
+      allowancesSettings,
+      offsetTimeByDragging,
+      false
+    );
+    //dispatchUpdateMustRedraw(true);
   };
 
   // D3 Operations
-
-  // Ok, isolated but useless?
-  /*
-  const drawOPs = (chartLocal) => {
-    const operationalPointsZone = chartLocal.drawZone
-      .append('g')
-      .attr('id', 'get-operationalPointsZone');
-    simulation.trains[selectedTrain].base.stops.forEach((stop) => {
-      operationalPointsZone
-        .append('line')
-        .datum(stop.position)
-        .attr('id', `op-${stop.id}`)
-        .attr('class', 'op-line')
-        .attr('x1', rotate ? (d) => chartLocal.x(d) : 0)
-        .attr('y1', rotate ? 0 : (d) => chartLocal.y(d))
-        .attr('x2', rotate ? (d) => chartLocal.x(d) : chartLocal.width)
-        .attr('y2', rotate ? chartLocal.height : (d) => chartLocal.y(d));
-      operationalPointsZone
-        .append('text')
-        .datum(stop.position)
-        .attr('class', 'op-text')
-        .text(`${stop.name || 'Unknown'} ${Math.round(stop.position) / 1000}`)
-        .attr('x', rotate ? (d) => chartLocal.x(d) : 0)
-        .attr('y', rotate ? 0 : (d) => chartLocal.y(d))
-        .attr('text-anchor', 'center')
-        .attr('dx', 5)
-        .attr('dy', rotate ? 15 : -5);
-    });
-  };
-  */
-
-  // eslint-disable-next-line default-param-last
-  /*
-  const drawAllTrains = (reset, forceRedraw = false, newDataSimulation) => {
-    const currentDataSimulation = newDataSimulation || dataSimulation;
-
-    if (mustRedraw || forceRedraw) {
-      const chartLocal = createChart(
-        chart,
-        CHART_ID,
-        currentDataSimulation,
-        heightOfSpaceTimeChart,
-        keyValues,
-        ref,
-        true, // We dont nor pass a reset trigger anymore, reset is an action or a effect
-        rotate
-      );
-
-      chartLocal.svg.on('click', () => {
-        dispatch(updateContextMenu(undefined));
-      });
-
-      drawOPs(chartLocal, simulation.trains[selectedTrain], rotate);
-
-      drawAxisTitle(chartLocal, rotate);
-      currentDataSimulation.forEach((train, idx) => {
-        drawTrain(
-          chartLocal,
-          dispatch,
-          train,
-          train.id === selectedProjection?.id,
-          idx === selectedTrain,
-          keyValues,
-          allowancesSettings,
-          offsetTimeByDragging,
-          rotate,
-          setDragEnding,
-          setDragOffset,
-          simulation,
-          train.isStdcm
-        );
-      });
-      enableInteractivity(
-        chartLocal,
-        currentDataSimulation[selectedTrain],
-        dispatch,
-        keyValues,
-        LIST_VALUES_NAME_SPACE_TIME,
-        positionValues,
-        rotate,
-        setChart,
-        setYPosition,
-        setZoomLevel,
-        yPosition,
-        zoomLevel
-      );
-      // findConflicts(chartLocal, dataSimulation, rotate);
-      setChart(chartLocal);
-      dispatch(updateChart({ ...chartLocal, rotate }));
-      dispatch(updateMustRedraw(false));
-      setResetChart(false);
-    }
-  };
-  */
-
+// HORREUR
   useEffect(() => {
-    setDataSimulation(createTrain(dispatch, keyValues, simulation.trains, t));
+    //setDataSimulation(createTrain(dispatch, keyValues, simulation.trains, t));
     setTimeout(() => {
-      dispatch(updateMustRedraw(true));
+      dispatchUpdateMustRedraw(true);
     }, 0);
   }, []);
 
   useEffect(() => {
     // ADN, entire fonction operation is subject to one condition, so aopply this condition before OR write clear and first condition to return (do nothing)
+    console.log('dragOffset Change', dragOffset);
     offsetTimeByDragging(dragOffset);
   }, [dragOffset]);
 
   useEffect(() => {
-    onDragEnding(dragEnding, setDragEnding);
-  }, [dragEnding]);
+    const trains = dataSimulation?.trains || simulation.trains;
+    const newDataSimulation = createTrain(dispatch, keyValues, trains, t);
 
-  // DO NOT SEE THE POINT
-  useEffect(() => {
-    setResetChart(true);
-  }, [consolidatedSimulation]);
-
-  useEffect(() => {
-    const newDataSimulation = createTrain(dispatch, keyValues, simulation.trains, t)
-    setDataSimulation(newDataSimulation);
-    console.log('newDataSimulation', newDataSimulation)
     if (newDataSimulation) {
       drawAllTrains(
         resetChart,
@@ -263,48 +189,13 @@ export default function SpaceTimeChart(props) {
       // Reprogram !
       //handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
     }
-  }, [mustRedraw, rotate, selectedTrain, consolidatedSimulation]);
+  }, [mustRedraw, rotate, selectedTrain, dataSimulation, heightOfSpaceTimeChart]);
 
   // ADN: trigger a redraw on every simulation change. This is the right pattern.
   useEffect(() => {
-    setDataSimulation(createTrain(dispatch, keyValues, simulation.trains, t));
-    const newDataSimulation = createTrain(dispatch, keyValues, simulation.trains, t);
-    if (dataSimulation) {
-      // ADN drawAllTrain already traceVerticalLines
-
-      drawAllTrains(
-        resetChart,
-        newDataSimulation,
-        mustRedraw,
-        chart,
-        heightOfSpaceTimeChart,
-        keyValues,
-        ref,
-        rotate,
-        dispatch,
-        CHART_ID,
-        simulation,
-        selectedTrain,
-        positionValues,
-        setChart,
-        setResetChart,
-        setYPosition,
-        setZoomLevel,
-        setDragEnding,
-        setDragOffset,
-        yPosition,
-        zoomLevel,
-        selectedProjection,
-        dispatchUpdateMustRedraw,
-        dispatchUpdateChart,
-        dispatchUpdateContextMenu,
-        allowancesSettings,
-        offsetTimeByDragging,
-        true
-      );
-      // Reprogram !
-      // handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
-    }
+    setDataSimulation(simulation);
+    // Reprogram !
+    // handleWindowResize(CHART_ID, dispatch, drawAllTrains, isResizeActive, setResizeActive);
   }, [simulation.trains]);
 
   useEffect(() => {
@@ -343,41 +234,63 @@ export default function SpaceTimeChart(props) {
   }, []);
 
   return (
-    <div
-      id={`container-${CHART_ID}`}
-      className="spacetime-chart w-100"
-      style={{ height: `${heightOfSpaceTimeChart}px` }}
+    <Rnd
+      default={{
+        x: 0,
+        y: 0,
+        width: '100%',
+        height: `${heightOfSpaceTimeChart}px`,
+      }}
+      minHeight={CHART_MIN_HEIGHT}
+      disableDragging
+      enableResizing={{
+        bottom: true,
+      }}
+      onResizeStart={() => setInitialHeightOfSpaceTimeChart(heightOfSpaceTimeChart)}
+      onResize={(_e, _dir, _refToElement, delta) => {
+        setHeightOfSpaceTimeChart(initialHeightOfSpaceTimeChart + delta.height);
+      }}
+      onResizeStop={() => {
+        dispatchUpdateMustRedraw(true)
+      }}
     >
-      {showModal !== '' ? (
-        <ChartModal
-          type={showModal}
-          setShowModal={setShowModal}
-          trainName={dataSimulation[selectedTrain].name}
-          offsetTimeByDragging={offsetTimeByDragging}
-        />
-      ) : null}
-      <div ref={ref} />
-      <button
-        type="button"
-        className="btn-rounded btn-rounded-white box-shadow btn-rotate"
-        onClick={() => toggleRotation(rotate, setRotate)}
+      <div className="spacetimechart-container"></div>
+      <div
+        id={`container-${CHART_ID}`}
+        className="spacetime-chart w-100"
+        style={{ height: `${heightOfSpaceTimeChart}px` }}
       >
-        <i className="icons-refresh" />
-      </button>
-      <button
-        type="button"
-        className="btn-rounded btn-rounded-white box-shadow btn-rotate mr-5"
-        onClick={() => {
-          setResetChart(true);
-          dispatch(updateMustRedraw(true));
-        }}
-      >
-        <GiResize />
-      </button>
-      <div className="handle-tab-resize">
-        <CgLoadbar />
+        {showModal !== '' ? (
+          <ChartModal
+            type={showModal}
+            setShowModal={setShowModal}
+            trainName={dataSimulation[selectedTrain].name}
+            offsetTimeByDragging={offsetTimeByDragging}
+          />
+        ) : null}
+        <div ref={ref} />
+        <button
+          type="button"
+          className="btn-rounded btn-rounded-white box-shadow btn-rotate"
+          onClick={() => toggleRotation(rotate, setRotate, dataSimulation)}
+        >
+          <i className="icons-refresh" />
+        </button>
+        <button
+          type="button"
+          className="btn-rounded btn-rounded-white box-shadow btn-rotate mr-5"
+          onClick={() => {
+            setResetChart(true);
+            dispatchUpdateMustRedraw(true);
+          }}
+        >
+          <GiResize />
+        </button>
+        <div className="handle-tab-resize">
+          <CgLoadbar />
+        </div>
       </div>
-    </div>
+    </Rnd>
   );
 }
 
@@ -390,17 +303,13 @@ SpaceTimeChart.propTypes = {
 SpaceTimeChart.defaultProps = {
   heightOfSpeedSpaceChart: 250,
   simulation: ORSD_GEV_SAMPLE_DATA.simulation.present,
-  chartXGEV: undefined,
   allowancesSettings: ORSD_GEV_SAMPLE_DATA.allowancesSettings,
-  chartXGEV: undefined,
   dispatch: () => {},
   mustRedraw: ORSD_GEV_SAMPLE_DATA.mustRedraw,
   positionValues: ORSD_GEV_SAMPLE_DATA.positionValues,
   selectedTrain: ORSD_GEV_SAMPLE_DATA.selectedTrain,
-  speedSpaceSettings: ORSD_GEV_SAMPLE_DATA.speedSpaceSettings,
   timePosition: ORSD_GEV_SAMPLE_DATA.timePosition,
-  consolidatedSimulation: ORSD_GEV_SAMPLE_DATA.consolidatedSimulation,
-  onOffsetTimeByDragging: () => {
+  onOffsetTimeByDragging: ({ ...args }) => {
     console.log('onOffsetTimeByDragging called');
   },
   onDragEnding: () => {
@@ -408,9 +317,6 @@ SpaceTimeChart.defaultProps = {
   },
   dispatchUpdateMustRedraw: () => {
     console.log('dispatchUpdateMustRedraw called');
-  },
-  dispatchUpdateChart: () => {
-    console.log('dispatchUpdateChart called');
   },
   dispatchUpdateChart: () => {
     console.log('dispatchUpdateChart called');

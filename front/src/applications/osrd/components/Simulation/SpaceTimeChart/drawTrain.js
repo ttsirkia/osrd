@@ -28,11 +28,6 @@ export default function drawTrain(
   simulation,
   isStdcm
 ) {
-  console.log("enter drawTrain", dataSimulation.trainNumber)
-  console.log(dataSimulation)
-  console.log(allowancesSettings)
-
-
 
   const groupID = `spaceTime-${dataSimulation.trainNumber}`;
 
@@ -75,7 +70,7 @@ export default function drawTrain(
   const drag = d3drag()
     .on('end', () => {
       dragTimeOffset(dragFullOffset, true);
-      setDragEnding(true);
+      //setDragEnding(true); // SHIT
       dispatch(updateMustRedraw(true));
     })
     .on('start', () => {
@@ -114,10 +109,8 @@ export default function drawTrain(
   const currentAllowanceSettings = allowancesSettings
     ? allowancesSettings[dataSimulation.id]
     : undefined;
-console.log(direction)
   if (direction && currentAllowanceSettings) {
     // Let's draw route_aspects
-    console.log("Enter draw Route Aspects")
     dataSimulation.routeAspects.forEach((routeAspect) => {
       drawRect(
         chart,

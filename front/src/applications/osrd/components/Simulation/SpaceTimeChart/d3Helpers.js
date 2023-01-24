@@ -78,8 +78,6 @@ const drawAllTrains = (
   forceRedraw = false,
 ) => {
   const currentDataSimulation = newDataSimulation || dataSimulation;
-  console.log("enter drawAllTrains", forceRedraw)
-  console.log("enter drawAllTrains rotate", rotate)
   if (mustRedraw || forceRedraw) {
     console.log('createChart', CHART_ID)
     const chartLocal = createChart(
@@ -89,7 +87,7 @@ const drawAllTrains = (
       heightOfSpaceTimeChart,
       keyValues,
       ref,
-      true, // We dont nor pass a reset trigger anymore, reset is an action or a effect
+      reset, // We dont nor pass a reset trigger anymore, reset is an action or a effect
       rotate
     );
 
