@@ -17,6 +17,7 @@ export default function createChart(
   rotate: boolean
 ): Chart {
   d3select(`#${chartID}`).remove();
+  console.log("Create Chart", dataSimulation)
 
   const xValues: (number | Date)[] = dataSimulation
     .map((train) =>
@@ -26,6 +27,7 @@ export default function createChart(
     )
     .flat(Infinity) as (number | Date)[];
 
+    console.log("Create Chart xValues", xValues)
   const dataSimulationLinearMax = d3.max([
     d3.max(
       [].concat(
@@ -51,7 +53,9 @@ export default function createChart(
     ),
   ] as any);
 
-
+console.log("does chart exists")
+console.log(chart)
+console.log(reset)
 
   const defineX = chart === undefined || reset ? defineTime(d3.extent(xValues)) : chart.x;
 

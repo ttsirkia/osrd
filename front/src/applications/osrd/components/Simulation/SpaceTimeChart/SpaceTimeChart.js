@@ -227,6 +227,7 @@ export default function SpaceTimeChart(props) {
   useEffect(() => {
     const newDataSimulation = createTrain(dispatch, keyValues, simulation.trains, t)
     setDataSimulation(newDataSimulation);
+    console.log('newDataSimulation', newDataSimulation)
     if (newDataSimulation) {
       drawAllTrains(
         resetChart,
@@ -256,7 +257,7 @@ export default function SpaceTimeChart(props) {
         dispatchUpdateContextMenu,
         allowancesSettings,
         offsetTimeByDragging,
-        false
+        true
       );
 
       // Reprogram !
@@ -274,7 +275,6 @@ export default function SpaceTimeChart(props) {
       drawAllTrains(
         resetChart,
         newDataSimulation,
-        dataSimulation,
         mustRedraw,
         chart,
         heightOfSpaceTimeChart,
@@ -391,6 +391,8 @@ SpaceTimeChart.defaultProps = {
   heightOfSpeedSpaceChart: 250,
   simulation: ORSD_GEV_SAMPLE_DATA.simulation.present,
   chartXGEV: undefined,
+  allowancesSettings: ORSD_GEV_SAMPLE_DATA.allowancesSettings,
+  chartXGEV: undefined,
   dispatch: () => {},
   mustRedraw: ORSD_GEV_SAMPLE_DATA.mustRedraw,
   positionValues: ORSD_GEV_SAMPLE_DATA.positionValues,
@@ -406,5 +408,17 @@ SpaceTimeChart.defaultProps = {
   },
   dispatchUpdateMustRedraw: () => {
     console.log('dispatchUpdateMustRedraw called');
+  },
+  dispatchUpdateChart: () => {
+    console.log('dispatchUpdateChart called');
+  },
+  dispatchUpdateChart: () => {
+    console.log('dispatchUpdateChart called');
+  },
+  dispatchUpdatePositionValues: () => {
+    console.log('dispatchUpdatePositionValues called');
+  },
+  dispatchUpdateContextMenu: () => {
+    console.log('dispatchUpdateContextMenu called');
   },
 };

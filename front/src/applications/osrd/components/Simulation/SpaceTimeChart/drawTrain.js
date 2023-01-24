@@ -28,6 +28,12 @@ export default function drawTrain(
   simulation,
   isStdcm
 ) {
+  console.log("enter drawTrain", dataSimulation.trainNumber)
+  console.log(dataSimulation)
+  console.log(allowancesSettings)
+
+
+
   const groupID = `spaceTime-${dataSimulation.trainNumber}`;
 
   const initialDrag = rotate ? chart.y.invert(0) : chart.x.invert(0);
@@ -108,9 +114,10 @@ export default function drawTrain(
   const currentAllowanceSettings = allowancesSettings
     ? allowancesSettings[dataSimulation.id]
     : undefined;
-
+console.log(direction)
   if (direction && currentAllowanceSettings) {
     // Let's draw route_aspects
+    console.log("Enter draw Route Aspects")
     dataSimulation.routeAspects.forEach((routeAspect) => {
       drawRect(
         chart,

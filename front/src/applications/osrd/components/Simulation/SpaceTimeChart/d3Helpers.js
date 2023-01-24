@@ -50,7 +50,6 @@ const drawAxisTitle = (chart, rotate) => {
 const drawAllTrains = (
   reset,
   newDataSimulation,
-  dataSimulation,
   mustRedraw,
   chart,
   heightOfSpaceTimeChart,
@@ -79,8 +78,10 @@ const drawAllTrains = (
   forceRedraw = false,
 ) => {
   const currentDataSimulation = newDataSimulation || dataSimulation;
-
+  console.log("enter drawAllTrains", forceRedraw)
+  console.log("enter drawAllTrains rotate", rotate)
   if (mustRedraw || forceRedraw) {
+    console.log('createChart', CHART_ID)
     const chartLocal = createChart(
       chart,
       CHART_ID,

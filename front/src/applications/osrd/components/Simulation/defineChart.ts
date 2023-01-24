@@ -44,6 +44,8 @@ const defineChart = (
 
   // Add X axis
   const x = defineX.range([0, width]);
+
+  console.log(rotate)
   const axisBottomX =
     !rotate && keyValues[0] === 'time'
       ? d3.axisBottom<Date>(x).tickFormat(d3.timeFormat('%H:%M:%S'))
