@@ -16,8 +16,6 @@ tags:
     description: Pathfinding
   - name: stdcm
     description: Short term DCM
-  - name: electrical_profiles
-    description: Electrical Profiles
 
 paths:
   /health/:
@@ -819,87 +817,6 @@ paths:
                         example: No path could be found
         400:
           description: The request body is invalid
-  /electrical_profile_set/:
-    get:
-      tags:
-        - electrical_profiles
-      summary: Retrieve the list of ids and names of electrical profile sets available
-      responses:
-        200:
-          description: Simulation result
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    name:
-                      type: string
-  /electrical_profile_set/{id}/:
-    get:
-      tags:
-        - electrical_profiles
-      summary: Retrieve the set of electrical profiles with the given id
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: Electrical profile set ID
-          required: true
-      responses:
-        200:
-          description: Simulation result
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    value:
-                      type: string
-                    power_class:
-                      type: string
-                    track_ranges:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          track:
-                            type: string
-                          begin:
-                            type: number
-                            format: float
-                          end:
-                            type: number
-                            format: float
-  /electrical_profile_set/level_order/{id}/:
-    get:
-      tags:
-        - electrical_profiles
-      summary: Retrieve the order of strength of the electrical profiles in the set with the given id
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: Electrical profile set ID
-          required: true
-      responses:
-        200:
-          description: Simulation result
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: 
-                  type: array
-                  items:
-                    type: string
 components:
   schemas:
     Infra:

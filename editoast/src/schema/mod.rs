@@ -13,6 +13,7 @@ mod switch_type;
 mod track_section;
 mod track_section_link;
 pub mod utils;
+pub mod electrical_profiles;
 pub use buffer_stop::{BufferStop, BufferStopCache};
 pub use catenary::Catenary;
 use derivative::Derivative;
@@ -187,6 +188,18 @@ impl OSRDObject for Waypoint {
         }
     }
 }
+
+#[derive(Debug, Derivative, Clone, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+#[derivative(Default)]
+pub struct TrackRange {
+    #[derivative(Default(value = r#""InvalidRef".into()"#))]
+    pub track: Identifier,
+    pub begin: f64,
+    #[derivative(Default(value = "100."))]
+    pub end: f64,
+}
+
 
 #[derive(Debug, Derivative, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]

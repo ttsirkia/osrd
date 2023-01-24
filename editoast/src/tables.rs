@@ -192,3 +192,12 @@ table! {
         infra_id -> BigInt,
     }
 }
+
+table! {
+    osrd_infra_electricalprofilesset(id) {
+        id -> Integer,
+        name -> Text,
+        data -> Jsonb,
+        level_order -> Jsonb,
+    }
+}
