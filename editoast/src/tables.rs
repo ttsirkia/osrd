@@ -194,10 +194,9 @@ table! {
 }
 
 table! {
-    osrd_infra_electricalprofilesset(id) {
-        id -> Integer,
+    osrd_infra_electricalprofileset(id) {
+        id -> BigInt,
         name -> Text,
         data -> Jsonb,
-        level_order -> Jsonb,
     }
 }

@@ -19,11 +19,11 @@ async fn list(conn: DBConnection) -> ApiResult<Json<Vec<LightElectricalProfileSe
 
 /// Return a specific set of electrical profiles
 #[get("/<electrical_profile_set>")]
-async fn get(conn: DBConnection, electrical_profile_set: i32) -> ApiResult<Custom<Json<Value>>> {
+async fn get(conn: DBConnection, electrical_profile_set: i64) -> ApiResult<Custom<Json<Value>>> {
     conn.run(move |conn| {
         Ok(Custom(
             Status::Ok,
-            Json(ElectricalProfileSet::retrieve(conn, electrical_profile_set)?.data),
+            Json(ElectricalProfileSet::retrieve_levels(conn, electrical_profile_set)?),
         ))
     })
     .await
@@ -33,12 +33,12 @@ async fn get(conn: DBConnection, electrical_profile_set: i32) -> ApiResult<Custo
 #[get("/<electrical_profile_set>/level_order")]
 async fn get_level_order(
     conn: DBConnection,
-    electrical_profile_set: i32,
+    electrical_profile_set: i64,
 ) -> ApiResult<Custom<Json<Value>>> {
     conn.run(move |conn| {
         Ok(Custom(
             Status::Ok,
-            Json(ElectricalProfileSet::retrieve(conn, electrical_profile_set)?.level_order),
+            Json(ElectricalProfileSet::retrieve_level_order(conn, electrical_profile_set)?),
         ))
     })
     .await

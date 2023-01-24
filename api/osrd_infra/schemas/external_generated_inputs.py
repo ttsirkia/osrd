@@ -14,17 +14,14 @@ class ElectricalProfile(BaseModel):
     track_ranges: List[TrackRange] = Field(description="List of locations where this profile is applied")
 
 
-class ElectricalProfilesList(BaseModel):
-    """This class is used for storage schema validation."""
+class ElectricalProfileSet(BaseModel):
+    """This class is used to represent a set of electrical profiles, to use in simulation along an infrastructure."""
 
-    __root__: List[ElectricalProfile]
-
-
-class ElectricalProfileLevelOrder(BaseModel):
-    """This class is used to define how electrical profile levels compare to each others."""
-
-    __root__: Dict[str, List[str]]
+    levels: List[ElectricalProfile] = Field(description="The list of electrical profiles")
+    level_order: Dict[str, List[str]] = Field(
+        description="A mapping from catenary modes to the electrical profile levels in decreasing order of magnitude"
+    )
 
 
 if __name__ == "__main__":
-    print(ElectricalProfile.schema_json(indent=4))
+    print(ElectricalProfileSet.schema_json(indent=4))
