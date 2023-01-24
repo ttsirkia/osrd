@@ -24,6 +24,6 @@ public class StandaloneSimResult {
     @Json(name = "speed_limits")
     public List<List<ResultEnvelopePoint>> speedLimits = new ArrayList<>();
     public List<Warning> warnings = new ArrayList<>();
-    @Json(name = "modes_and_profiles_seen")
-    public List<RangeMap<Double, PhysicsPath.ModeAndProfile>> modesAndProfilesUsed = new ArrayList<>();
+    @Json(name = "modes_and_profiles")
+    public List<List<ResultModeAndProfilePoint>> modesAndProfiles = new ArrayList<>();
 }

@@ -64,7 +64,6 @@ public class EnvelopePath implements PhysicsPath {
 
     private ImmutableRangeMap<Double, ModeAndProfile> initCatenaryModes(RangeMap<Double, String> catenaryModes) {
         TreeRangeMap<Double, ModeAndProfile> modeAndProfileMap = TreeRangeMap.create();
-        modeAndProfileMap.put(Range.all(), new ModeAndProfile(null, null));
         for (var modeEntry : catenaryModes.asMapOfRanges().entrySet()) {
             modeAndProfileMap.put(modeEntry.getKey(), new ModeAndProfile(modeEntry.getValue(), null));
         }
@@ -129,9 +128,9 @@ public class EnvelopePath implements PhysicsPath {
         modeAndProfileMapsByPowerClass = new HashMap<>();
 
         for (var powerClassEntry : electricalProfilesByPowerClass.entrySet()) {
-            var powerClass = powerClassEntry.getKey();
             var profileMap = powerClassEntry.getValue();
             TreeRangeMap<Double, ModeAndProfile> profilesAndModes = TreeRangeMap.create();
+            profilesAndModes.put(Range.closed(0.0, length), new ModeAndProfile(null, null));
             profilesAndModes.putAll(catenaryModeMap);
 
             for (var profileEntry : profileMap.asMapOfRanges().entrySet()) {
@@ -141,7 +140,7 @@ public class EnvelopePath implements PhysicsPath {
                     profilesAndModes.put(entry.getKey(), new ModeAndProfile(mode, profileLevel));
                 }
             }
-            modeAndProfileMapsByPowerClass.put(powerClass, ImmutableRangeMap.copyOf(profilesAndModes));
+            modeAndProfileMapsByPowerClass.put(powerClassEntry.getKey(), ImmutableRangeMap.copyOf(profilesAndModes));
         }
     }
 

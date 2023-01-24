@@ -1,5 +1,7 @@
 package fr.sncf.osrd.train;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
@@ -9,9 +11,6 @@ import fr.sncf.osrd.envelope_sim.PhysicsRollingStock;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 
 public class TestRollingStock {
     @Test
@@ -29,7 +28,8 @@ public class TestRollingStock {
 
         RangeMap<Double, PhysicsRollingStock.TractiveEffortPoint[]> res = null;
         for (var path : List.of(path1, path2, path3)) {
-            var tractiveEffortCurveMap = rollingStock.mapTractiveEffortCurves(path, RollingStock.Comfort.STANDARD).curves();
+            var tractiveEffortCurveMap =
+                    rollingStock.mapTractiveEffortCurves(path, RollingStock.Comfort.STANDARD).curves();
             if (res == null)
                 res = tractiveEffortCurveMap;
             testRangeCoverage(tractiveEffortCurveMap, path.getLength());

@@ -9,6 +9,7 @@ import java.util.List;
 
 
 public class ExternalGeneratedInputsHelpers {
+    /** Return a short list of electrical profiles */
     public static List<RJSElectricalProfile> getRjsElectricalProfiles() {
         return asList(new RJSElectricalProfile("25000", "1",
                         asList(new RJSTrackRange("track", 0, 10), new RJSTrackRange("track", 90, 100))),

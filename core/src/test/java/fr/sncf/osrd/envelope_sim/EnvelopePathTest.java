@@ -42,17 +42,17 @@ public class EnvelopePathTest {
         modes.put(Range.closed(7.1, 10.0), "25000");
         var path = new EnvelopePath(10, new double[] { 0, 10 }, new double[] { 0 }, modes);
         var modeAndProfileMap = path.getModeAndProfileMap(null);
-        for (var offset: new double[] { 0, 7.05, 15 }) {
-            var modeAndProfile = modeAndProfileMap.get(offset);
-            assertNotNull(modeAndProfile);
-            assertNull(modeAndProfile.mode());
-            assertNull(modeAndProfile.profile());
-        }
 
-        var modeAndProfile = modeAndProfileMap.get(4.);
+        var modeAndProfile = modeAndProfileMap.get(0.);
+        assertNull(modeAndProfile);
+
+        modeAndProfile = modeAndProfileMap.get(4.);
         assertNotNull(modeAndProfile);
         assertEquals("1500", modeAndProfile.mode());
         assertNull(modeAndProfile.profile());
+
+        modeAndProfile = modeAndProfileMap.get(7.05);
+        assertNull(modeAndProfile);
 
         modeAndProfile = modeAndProfileMap.get(7.2);
         assertNotNull(modeAndProfile);
@@ -81,14 +81,7 @@ public class EnvelopePathTest {
 
         var modeAndProfileMap = path.getModeAndProfileMap("2");
 
-        assertEquals(8, modeAndProfileMap.asMapOfRanges().size());
-
-        for (var offset: new double[] { 0, 7.05, 15 }) {
-            var modeAndProfile = modeAndProfileMap.get(offset);
-            assertNotNull(modeAndProfile);
-            assertNull(modeAndProfile.mode());
-            assertNull(modeAndProfile.profile());
-        }
+        assertEquals(6, modeAndProfileMap.asMapOfRanges().size());
 
         var modeAndProfile = modeAndProfileMap.get(3.5);
         assertNotNull(modeAndProfile);

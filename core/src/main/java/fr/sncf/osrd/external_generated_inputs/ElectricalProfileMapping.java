@@ -47,12 +47,12 @@ public class ElectricalProfileMapping {
             double offset = 0;
             for (var trackRange : TrainPath.removeLocation(trainPath.trackRangePath())) {
                 var trackID = trackRange.track.getEdge().getID();
-                if (!byTrackMapping.containsKey(trackID))
-                    continue;
-                var pathRangeMapping = trackRange.convertMap(byTrackMapping.get(trackID));
-                for (var entry : pathRangeMapping.asMapOfRanges().entrySet())
-                    rangeMap.put(Range.closedOpen(entry.getKey().lowerEndpoint() + offset,
-                            entry.getKey().upperEndpoint() + offset), entry.getValue());
+                if (byTrackMapping.containsKey(trackID)) {
+                    var pathRangeMapping = trackRange.convertMap(byTrackMapping.get(trackID));
+                    for (var entry : pathRangeMapping.asMapOfRanges().entrySet())
+                        rangeMap.put(Range.closedOpen(entry.getKey().lowerEndpoint() + offset,
+                                entry.getKey().upperEndpoint() + offset), entry.getValue());
+                }
                 offset += trackRange.getLength();
             }
             res.put(powerClass, rangeMap.build());

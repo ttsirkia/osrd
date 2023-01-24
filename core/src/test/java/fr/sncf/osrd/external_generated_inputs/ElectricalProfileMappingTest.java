@@ -91,11 +91,11 @@ public class ElectricalProfileMappingTest {
         assertEquals(profiles.keySet(), new HashSet<>(asList("1", "2", "3", "4", "5")));
 
         var expectedResults = new ArrayList<HashSet<String>>();
-        expectedResults.add(new HashSet<>(asList("25000", "O")));
+        expectedResults.add(new HashSet<>(asList("25000")));
         expectedResults.add(new HashSet<>(asList("25000", "22500")));
         expectedResults.add(new HashSet<>(asList("25000", "22500")));
         expectedResults.add(new HashSet<>(asList("25000", "22500", "20000")));
-        expectedResults.add(new HashSet<>(asList("25000", "22500", "20000")));
+        expectedResults.add(new HashSet<>(asList("25000", "22500", "20000", "O")));
 
         for (int i = 1; i <= 5; i++) {
             var profileRangeMap = profiles.get(String.valueOf(i));
@@ -103,7 +103,7 @@ public class ElectricalProfileMappingTest {
             for (var range : profileRangeMap.asMapOfRanges().entrySet()) {
                 values.add(range.getValue());
             }
-            assertEquals(values, expectedResults.get(i - 1));
+            assertEquals(expectedResults.get(i - 1), values);
         }
 
     }

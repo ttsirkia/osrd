@@ -1,5 +1,10 @@
 package fr.sncf.osrd.api;
 
+import static fr.sncf.osrd.Helpers.getExampleRollingStock;
+import static fr.sncf.osrd.Helpers.getExampleRollingStocks;
+import static fr.sncf.osrd.utils.takes.TakesUtils.readBodyResponse;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.common.collect.Iterables;
 import fr.sncf.osrd.api.StandaloneSimulationEndpoint.StandaloneSimulationRequest;
 import fr.sncf.osrd.railjson.parser.exceptions.InvalidRollingStock;
@@ -15,11 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.takes.rq.RqFake;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import static fr.sncf.osrd.Helpers.getExampleRollingStock;
-import static fr.sncf.osrd.Helpers.getExampleRollingStocks;
-import static fr.sncf.osrd.utils.takes.TakesUtils.readBodyResponse;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
 
 public class StandaloneSimulationTest extends ApiTest {
@@ -47,6 +48,7 @@ public class StandaloneSimulationTest extends ApiTest {
         return trainPath;
     }
 
+    /** Returns a small train path on small infra */
     public static RJSTrainPath smallInfraTrainPath() {
         var trainPath = new RJSTrainPath();
         var trackRanges1 = new ArrayList<RJSTrainPath.RJSDirectionalTrackRange>();
@@ -69,6 +71,7 @@ public class StandaloneSimulationTest extends ApiTest {
         return trainPath;
     }
 
+    /**  */
     public StandaloneSimResult runStandaloneSimulation(StandaloneSimulationRequest request) throws
             InvalidRollingStock,
             InvalidSchedule,
@@ -454,5 +457,62 @@ public class StandaloneSimulationTest extends ApiTest {
                     "Power class " + i + " should be faster than " + (i + 1)
                             + ", but was " + resultA + " vs " + resultB);
         }
+    }
+
+    @Test
+    public void testModesAndProfilesInResult() throws IOException {
+        final var rjsTrainPath = smallInfraTrainPath();
+
+        // Duplicate fast rolling stock but with many power classes
+        var rollingStock = getExampleRollingStock("fast_rolling_stock.json");
+        rollingStock.powerClass = "5";
+
+        var trainSchedule = new RJSStandaloneTrainSchedule("Test", rollingStock.name,
+                0, new RJSAllowance[0], new RJSTrainStop[]{RJSTrainStop.lastStop(0.1)}, null);
+        trainSchedule.comfort = RJSComfortType.AC;
+
+        // build the simulation request
+        var query = new StandaloneSimulationRequest(
+                "small_infra/infra.json",
+                "small_infra/external_generated_inputs.json",
+                "1",
+                2,
+                List.of(rollingStock),
+                List.of(trainSchedule),
+                rjsTrainPath
+        );
+
+        // parse back the simulation result
+        var simResult = runStandaloneSimulation(query);
+        var modesAndProfiles = simResult.modesAndProfiles.get(0);
+        System.out.println(modesAndProfiles);
+
+        assertNotNull(modesAndProfiles);
+        var modeAndProfile0 = modesAndProfiles.get(0);
+        assertEquals(0.0, modeAndProfile0.start);
+        assertEquals("1500", modeAndProfile0.seenMode);
+        assertEquals("O", modeAndProfile0.seenProfile);
+        assertEquals("thermal", modeAndProfile0.usedMode);
+        assertNull(modeAndProfile0.usedProfile);
+
+        assertEquals("25000", modesAndProfiles.get(1).usedProfile);
+
+        var previousStart = modeAndProfile0.start;
+        var profiles = new String[]{"25000", "22500", "20000", "22500", "25000"};
+        var profileIndex = 0;
+        for (var modeAndProfile: modesAndProfiles.subList(1, modesAndProfiles.size())) {
+            assertTrue(previousStart < modeAndProfile.start);
+            previousStart = modeAndProfile.start;
+            assertNull(modeAndProfile.seenMode);
+            assertNull(modeAndProfile.seenProfile);
+            assertEquals("25000", modeAndProfile.usedMode);
+            assertNotNull(modeAndProfile.usedProfile);
+            if (!modeAndProfile.usedProfile.equals(profiles[profileIndex])) {
+                profileIndex++;
+            }
+            assertEquals(profiles[profileIndex], modeAndProfile.usedProfile);
+        }
+
+        assertEquals(4, profileIndex);
     }
 }

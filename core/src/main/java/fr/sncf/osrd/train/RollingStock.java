@@ -190,8 +190,11 @@ public class RollingStock implements PhysicsRollingStock {
                                                       Comfort comfort) {
         // Get mode effort curves
         var mode = modes.get(defaultMode);
-        if (catenaryMode != null && modes.containsKey(catenaryMode))
+        var usedMode = defaultMode;
+        if (catenaryMode != null && modes.containsKey(catenaryMode)) {
             mode = modes.get(catenaryMode);
+            usedMode = catenaryMode;
+        }
 
         // Get best curve given a comfort
         for (var condCurve : mode.curves) {
@@ -201,7 +204,7 @@ public class RollingStock implements PhysicsRollingStock {
                         condCurve.curve);
             }
         }
-        return new ConditionAndCurve(new PhysicsPath.ModeAndProfile(defaultMode, null), mode.defaultCurve);
+        return new ConditionAndCurve(new PhysicsPath.ModeAndProfile(usedMode, null), mode.defaultCurve);
     }
 
     /**
@@ -222,7 +225,7 @@ public class RollingStock implements PhysicsRollingStock {
             res.put(modeAndProfileEntry.getKey(), curve.curve);
             conditionsUsed.put(modeAndProfileEntry.getKey(), curve.modeAndProfile);
         }
-        return new CurvesAndConditions(ImmutableRangeMap.copyOf(res), conditionsUsed);
+        return new CurvesAndConditions(ImmutableRangeMap.copyOf(res), ImmutableRangeMap.copyOf(conditionsUsed));
     }
 
     public Set<String> getModeNames() {

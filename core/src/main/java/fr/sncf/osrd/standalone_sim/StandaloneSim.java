@@ -1,10 +1,8 @@
 package fr.sncf.osrd.standalone_sim;
 
-import com.google.common.collect.RangeMap;
 import fr.sncf.osrd.envelope.Envelope;
 import fr.sncf.osrd.envelope_sim.EnvelopePath;
 import fr.sncf.osrd.envelope_sim.EnvelopeSimContext;
-import fr.sncf.osrd.envelope_sim.PhysicsPath;
 import fr.sncf.osrd.envelope_sim.allowances.Allowance;
 import fr.sncf.osrd.envelope_sim.pipelines.MaxEffortEnvelope;
 import fr.sncf.osrd.envelope_sim.pipelines.MaxSpeedEnvelope;
@@ -14,10 +12,10 @@ import fr.sncf.osrd.infra_state.api.TrainPath;
 import fr.sncf.osrd.reporting.ErrorContext;
 import fr.sncf.osrd.reporting.exceptions.OSRDError;
 import fr.sncf.osrd.standalone_sim.result.ResultEnvelopePoint;
+import fr.sncf.osrd.standalone_sim.result.ResultModeAndProfilePoint;
 import fr.sncf.osrd.standalone_sim.result.ResultTrain;
 import fr.sncf.osrd.standalone_sim.result.StandaloneSimResult;
 import fr.sncf.osrd.train.StandaloneTrainSchedule;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,18 +36,19 @@ public class StandaloneSim {
         var cacheSpeedLimits = new HashMap<StandaloneTrainSchedule, List<ResultEnvelopePoint>>();
         var cacheMaxEffort = new HashMap<StandaloneTrainSchedule, ResultTrain>();
         var cacheEco = new HashMap<StandaloneTrainSchedule, ResultTrain>();
-        var cacheModeAndProfiles = new HashMap<StandaloneTrainSchedule, RangeMap<Double, PhysicsPath.ModeAndProfile>>();
+        var cacheModeAndProfiles = new HashMap<StandaloneTrainSchedule, List<ResultModeAndProfilePoint>>();
         for (var trainSchedule : schedules) {
             if (!cacheMaxEffort.containsKey(trainSchedule)) {
+                var rollingStock = trainSchedule.rollingStock;
                 // MRSP & SpeedLimits
-                var mrsp = MRSP.from(trainPath, trainSchedule.rollingStock, true, trainSchedule.tag);
-                var speedLimits = MRSP.from(trainPath, trainSchedule.rollingStock, false, trainSchedule.tag);
+                var mrsp = MRSP.from(trainPath, rollingStock, true, trainSchedule.tag);
+                var speedLimits = MRSP.from(trainPath, rollingStock, false, trainSchedule.tag);
                 cacheSpeedLimits.put(trainSchedule, ResultEnvelopePoint.from(speedLimits));
 
                 // Base
-                var context = new EnvelopeSimContext(trainSchedule.rollingStock, envelopePath, timeStep,
-                        trainSchedule.comfort);
-                cacheModeAndProfiles.put(trainSchedule, context.modeAndProfilesUsed);
+                var context = new EnvelopeSimContext(rollingStock, envelopePath, timeStep, trainSchedule.comfort);
+                cacheModeAndProfiles.put(trainSchedule, ResultModeAndProfilePoint.from(
+                        context.modeAndProfilesUsed, envelopePath.getModeAndProfileMap(rollingStock.powerClass)));
                 var envelope = computeMaxEffortEnvelope(context, mrsp, trainSchedule);
                 var simResultTrain = ScheduleMetadataExtractor.run(
                         envelope,
@@ -73,6 +72,7 @@ public class StandaloneSim {
             result.speedLimits.add(cacheSpeedLimits.get(trainSchedule));
             result.baseSimulations.add(cacheMaxEffort.get(trainSchedule));
             result.ecoSimulations.add(cacheEco.getOrDefault(trainSchedule, null));
+            result.modesAndProfiles.add(cacheModeAndProfiles.get(trainSchedule));
         }
         return result;
     }

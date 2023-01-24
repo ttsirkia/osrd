@@ -576,9 +576,9 @@ speed_2.add_track_range(th1, 3500, 4400, ApplicableDirection.BOTH)
 # ================================
 #  Catenaries
 # ================================
-electrified_tracks = set(builder.infra.track_sections.copy()) - {td1}
-builder.infra.catenaries.append(Catenary("catenary_25k", "25000", electrified_tracks))
-
+electrified_tracks_25000 = set(builder.infra.track_sections) - {td1, ta0}
+builder.infra.catenaries.append(Catenary("catenary_25k", "25000", electrified_tracks_25000))
+builder.infra.catenaries.append(Catenary("catenary_1.5k", "1500", {ta0}))
 # ================================
 # Produce the railjson
 # ================================
@@ -653,12 +653,12 @@ for power_class, boundaries in ep_boundaries.items():
         )
         ep.add_track_range(ta6, start * 1000, end * 1000)
 
-ep_o = external_inputs.add_electrical_profile(value="O", power_class="1")
+ep_o = external_inputs.add_electrical_profile(value="O", power_class="5")
 ep_o.add_track_range(ta0, 0, ta0.length)
 # We voluntarily leave ta0 empty for other power classes
 
 other_eps = [external_inputs.add_electrical_profile(value="25000", power_class=str(i)) for i in range(1, 6)]
-for track_section in electrified_tracks - {ta0, ta6}:
+for track_section in electrified_tracks_25000 - {ta6}:
     for ep in other_eps:
         ep.add_track_range(track_section, 0, track_section.length)
 
