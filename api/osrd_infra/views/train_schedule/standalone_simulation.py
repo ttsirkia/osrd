@@ -5,6 +5,7 @@ from django.conf import settings
 from rest_framework.exceptions import APIException
 
 from osrd_infra.models import TrackSectionModel, TrainScheduleModel
+from osrd_infra.models.infra import Infra
 from osrd_infra.utils import make_exception_from_error
 
 
@@ -53,8 +54,11 @@ def create_backend_request_payload(train_schedules: List[TrainScheduleModel]):
             }
         )
 
+    electrical_profile_set = train_schedules[0].timetable.electrical_profile_set
+
     return {
         "infra": train_schedules[0].timetable.infra.pk,
+        "electrical_profile_set": electrical_profile_set.pk if electrical_profile_set else None,
         "expected_version": train_schedules[0].timetable.infra.version,
         "rolling_stocks": [rs.to_schema().dict() for rs in rolling_stocks],
         "trains_path": {"route_paths": path_payload["route_paths"]},
@@ -77,7 +81,7 @@ def run_simulation(request_payload):
     return response.json()
 
 
-def process_simulation_response(infra, train_schedules, response_payload):
+def process_simulation_response(infra: Infra, train_schedules: List[TrainScheduleModel], response_payload):
     """
     This function process the payload returned by the backend and fill schedules
     """
