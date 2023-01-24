@@ -654,7 +654,13 @@ ep_c = external_inputs.add_electrical_profile(value="C", power_class="1")
 ep_c.add_track_range(ta6, 4000, ta6.length-4000)
 
 ep_25000 = external_inputs.add_electrical_profile(value="25000", power_class="1")
+ep_22500 = external_inputs.add_electrical_profile(value="22500", power_class="2")
+ep_20000_3 = external_inputs.add_electrical_profile(value="20000", power_class="3")
+ep_20000_4 = external_inputs.add_electrical_profile(value="20000", power_class="4")
+ep_20000_5 = external_inputs.add_electrical_profile(value="20000", power_class="5")
 for track_section in set(builder.infra.track_sections) - {td1, ta0, ta6}:
-    ep_25000.add_track_range(track_section, 0, track_section.length)
+    for ep in [ep_25000, ep_22500, ep_20000_3, ep_20000_4, ep_20000_5]:
+        ep.add_track_range(track_section, 0, track_section.length)
+
 
 external_inputs.save(OUTPUT_DIR / "external_generated_inputs.json")
