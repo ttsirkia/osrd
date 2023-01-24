@@ -46,8 +46,11 @@ public class ElectricalProfileMapping {
             var rangeMap = new ImmutableRangeMap.Builder<Double, String>();
             double offset = 0;
             for (var trackRange : TrainPath.removeLocation(trainPath.trackRangePath())) {
-                var rangeMapping = trackRange.convertMap(byTrackMapping.get(trackRange.track.getEdge().getID()));
-                for (var entry : rangeMapping.asMapOfRanges().entrySet())
+                var trackID = trackRange.track.getEdge().getID();
+                if (!byTrackMapping.containsKey(trackID))
+                    continue;
+                var pathRangeMapping = trackRange.convertMap(byTrackMapping.get(trackID));
+                for (var entry : pathRangeMapping.asMapOfRanges().entrySet())
                     rangeMap.put(Range.closedOpen(entry.getKey().lowerEndpoint() + offset,
                             entry.getKey().upperEndpoint() + offset), entry.getValue());
                 offset += trackRange.getLength();

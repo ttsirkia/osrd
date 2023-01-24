@@ -2,13 +2,9 @@ package fr.sncf.osrd.cli;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import fr.sncf.osrd.api.ElectricalProfileSetManager;
-import fr.sncf.osrd.api.InfraCacheStatusEndpoint;
-import fr.sncf.osrd.api.InfraManager;
-import fr.sncf.osrd.api.VersionEndpoint;
-import fr.sncf.osrd.api.stdcm.STDCMEndpoint;
+import fr.sncf.osrd.api.*;
 import fr.sncf.osrd.api.pathfinding.PathfindingRoutesEndpoint;
-import fr.sncf.osrd.api.StandaloneSimulationEndpoint;
+import fr.sncf.osrd.api.stdcm.STDCMEndpoint;
 import io.sentry.Sentry;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
@@ -43,7 +39,7 @@ public final class ApiServerCommand implements CliCommand {
 
         if (middlewareBaseUrl == null)
             throw new RuntimeException(
-                    "No middleware base url specified. Use '--url' option or 'MIDDLEWARE_BASE_URL' environment variable");
+                "No middleware base url specified. Use '--url' option or 'MIDDLEWARE_BASE_URL' environment variable");
 
         if (!middlewareBaseUrl.endsWith("/"))
             return middlewareBaseUrl + "/";

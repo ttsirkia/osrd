@@ -43,6 +43,10 @@ public class Helpers {
         return parseRollingStockDir(getResourcePath("rolling_stocks/"));
     }
 
+    public static RJSRollingStock getExampleRollingStock(String fileName) throws IOException, InvalidRollingStock {
+        return MoshiUtils.deserialize(RJSRollingStock.adapter, getResourcePath("rolling_stocks/" + fileName));
+    }
+
     public static RJSInfra getExampleInfra(String infraPath) throws IOException, URISyntaxException {
         return deserializeResource(RJSInfra.adapter, infraPath);
     }

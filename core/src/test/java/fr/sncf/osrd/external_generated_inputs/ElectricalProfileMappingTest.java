@@ -7,6 +7,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static fr.sncf.osrd.Helpers.*;
+import static fr.sncf.osrd.api.StandaloneSimulationTest.smallInfraTrainPath;
 
 import fr.sncf.osrd.Helpers;
 import fr.sncf.osrd.infra_state.implementation.TrainPathBuilder;
@@ -15,6 +17,7 @@ import fr.sncf.osrd.railjson.schema.schedule.RJSTrainPath;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -40,14 +43,13 @@ public class ElectricalProfileMappingTest {
 
         var profileMap = new ElectricalProfileMapping();
         profileMap.parseRJS(profiles);
-        profileMap.parseRJS(profiles);
 
         verifyProfileMap(profileMap);
         assertEquals(5, profileMap.mapping.size()); // 5 power classes
     }
 
     @Test
-    public void testGetProfileByPath() {
+    public void testGetProfileByPathSingleTrackInfra() {
         var rjsElectricalProfiles = getRjsElectricalProfiles();
 
         var profileMap = new ElectricalProfileMapping();
@@ -71,4 +73,39 @@ public class ElectricalProfileMappingTest {
         assertEquals("22500", profileRangeMap.get(50.));
         assertEquals("22500", profileRangeMap.get(59.5));
     }
+
+    @Test
+    public void testGetProfileByPathSmallInfra() throws IOException, URISyntaxException {
+        var rjsElectricalProfiles = getExampleElectricalProfiles("small_infra/external_generated_inputs.json");
+
+        var profileMap = new ElectricalProfileMapping();
+        profileMap.parseRJS(rjsElectricalProfiles);
+
+        var rjsInfra = getExampleInfra("small_infra/infra.json");
+        var infra = infraFromRJS(rjsInfra);
+
+        var rjsPath = smallInfraTrainPath();
+        var path = TrainPathBuilder.from(infra, rjsPath);
+
+        var profiles = profileMap.getProfilesOnPath(path, new HashSet<>(asList("1", "2", "3", "4", "5")));
+        assertEquals(profiles.keySet(), new HashSet<>(asList("1", "2", "3", "4", "5")));
+
+        var expectedResults = new ArrayList<HashSet<String>>();
+        expectedResults.add(new HashSet<>(asList("25000", "O")));
+        expectedResults.add(new HashSet<>(asList("25000", "22500")));
+        expectedResults.add(new HashSet<>(asList("25000", "22500")));
+        expectedResults.add(new HashSet<>(asList("25000", "22500", "20000")));
+        expectedResults.add(new HashSet<>(asList("25000", "22500", "20000")));
+
+        for (int i = 1; i <= 5; i++) {
+            var profileRangeMap = profiles.get(String.valueOf(i));
+            var values = new HashSet<>();
+            for (var range : profileRangeMap.asMapOfRanges().entrySet()) {
+                values.add(range.getValue());
+            }
+            assertEquals(values, expectedResults.get(i - 1));
+        }
+
+    }
+
 }

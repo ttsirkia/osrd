@@ -1,12 +1,12 @@
 package fr.sncf.osrd.external_generated_inputs;
 
-import fr.sncf.osrd.railjson.schema.RJSElectricalProfile;
-import fr.sncf.osrd.railjson.schema.infra.trackranges.RJSTrackRange;
-
-import java.util.List;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+
+import fr.sncf.osrd.railjson.schema.RJSElectricalProfile;
+import fr.sncf.osrd.railjson.schema.infra.trackranges.RJSTrackRange;
+import java.util.List;
+
 
 public class ExternalGeneratedInputsHelpers {
     public static List<RJSElectricalProfile> getRjsElectricalProfiles() {

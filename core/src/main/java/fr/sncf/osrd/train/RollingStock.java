@@ -159,7 +159,7 @@ public class RollingStock implements PhysicsRollingStock {
          */
         public boolean match(Comfort comfort, String electricalProfile) {
             return (this.comfort == null || comfort == this.comfort)
-                    && (this.electricalProfile == null || electricalProfile.equals(this.electricalProfile));
+                    && (this.electricalProfile == null || this.electricalProfile.equals(electricalProfile));
         }
     }
 

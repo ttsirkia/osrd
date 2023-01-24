@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
 
-import json
 from railjson_generator.schema.infra.range_elements import TrackRange
 
 from schemas import external_generated_inputs
