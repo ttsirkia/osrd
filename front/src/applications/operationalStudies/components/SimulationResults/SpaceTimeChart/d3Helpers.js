@@ -1,12 +1,12 @@
-import drawTrain from 'applications/osrd/components/Simulation/SpaceTimeChart/drawTrain';
+import drawTrain from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/drawTrain';
 
-import createChart from 'applications/osrd/components/Simulation/SpaceTimeChart/createChart';
+import createChart from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/createChart';
 
 import enableInteractivity, {
   traceVerticalLine,
-} from 'applications/osrd/components/Simulation/enableInteractivity';
+} from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/enableInteractivity';
 
-import { LIST_VALUES_NAME_SPACE_TIME } from 'applications/osrd/components/Simulation/consts';
+import { LIST_VALUES_NAME_SPACE_TIME } from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
 
 function drawOPs(chartLocal, selectedTrainSimulation, rotate) {
   const operationalPointsZone = chartLocal.drawZone

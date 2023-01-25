@@ -1,6 +1,6 @@
 import React from 'react';
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import SpaceTimeChart from 'applications/osrd/components/Simulation/SpaceTimeChart/SpaceTimeChart';
+import SpaceTimeChart from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/SpaceTimeChart';
 
 export default {
   /* 👇 The title prop is optional.

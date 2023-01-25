@@ -18,7 +18,7 @@ import {
   getConsolidatedSimulation,
   getPresentSimulation,
 } from 'reducers/osrdsimulation/selectors';
-import { changeTrain } from 'applications/osrd/components/TrainList/TrainListHelpers';
+import { changeTrain } from 'applications/operationalStudies/components/SimulationResults/simulationResultsHelpers';
 import { persistentUpdateSimulation } from 'reducers/osrdsimulation/simulation';
 import SpaceTimeChart from './SpaceTimeChart';
 
@@ -52,7 +52,8 @@ const withOSRDData = (Component) =>
 
     // Consequence of direct actions by component
     const onOffsetTimeByDragging = (trains) => {
-      dispatch(persistentUpdateSimulation({ ...simulation, trains }));
+      console.log('update onOffsetTimeByDragging', trains)
+      //dispatch(persistentUpdateSimulation({ ...simulation, trains }));
     };
 
     const onDragEnding = (dragEnding, setDragEnding) => {
@@ -105,7 +106,6 @@ const withOSRDData = (Component) =>
         dispatchUpdateContextMenu={dispatchUpdateContextMenu}
         dispatchUpdateChart={dispatchUpdateChart}
         dispatchUpdatePositionValues={dispatchUpdatePositionValues}
-        dispatchUpdateChart={dispatchUpdateChart}
       />
     );
   };

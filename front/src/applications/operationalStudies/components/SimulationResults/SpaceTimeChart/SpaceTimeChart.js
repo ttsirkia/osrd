@@ -3,27 +3,27 @@ import * as d3 from 'd3';
 import React, { useEffect, useRef, useState } from 'react';
 import enableInteractivity, {
   traceVerticalLine,
-} from 'applications/osrd/components/Simulation/enableInteractivity';
+} from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/enableInteractivity';
 import { Rnd } from 'react-rnd';
 import {
   handleWindowResize,
   interpolateOnTime,
   timeShiftTrain,
-} from 'applications/osrd/components/Helpers/ChartHelpers';
-import ORSD_GEV_SAMPLE_DATA from '../SpeedSpaceChart/sampleData';
+} from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/ChartHelpers';
+import ORSD_GEV_SAMPLE_DATA from 'applications/operationalStudies/components/SimulationResults/SpeedSpaceChart/sampleData';
 import { CgLoadbar } from 'react-icons/cg';
-import ChartModal from 'applications/osrd/components/Simulation/ChartModal';
+import ChartModal from 'applications/operationalStudies/components/SimulationResults/ChartModal';
 import { GiResize } from 'react-icons/gi';
-import { LIST_VALUES_NAME_SPACE_TIME } from 'applications/osrd/components/Simulation/consts';
+import { LIST_VALUES_NAME_SPACE_TIME } from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
 import PropTypes from 'prop-types';
-import createTrain from 'applications/osrd/components/Simulation/SpaceTimeChart/createTrain';
+import createTrain from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/createTrain';
 
 import { useTranslation } from 'react-i18next';
 
 import {
   drawOPs,
   drawAllTrains,
-} from 'applications/osrd/components/Simulation/SpaceTimeChart/d3Helpers';
+} from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/d3Helpers';
 
 const CHART_ID = 'SpaceTimeChart';
 const CHART_MIN_HEIGHT = 200;
@@ -59,6 +59,7 @@ export default function SpaceTimeChart(props) {
     dispatchUpdatePositionValues,
     dispatchUpdateChart,
     dispatchUpdateContextMenu,
+    initialHeightOfSpaceTimeChart,
   } = props;
 
   const keyValues = ['time', 'position'];
@@ -72,8 +73,11 @@ export default function SpaceTimeChart(props) {
   const [showModal, setShowModal] = useState('');
   const [dragOffset, setDragOffset] = useState(0);
   const [dragEnding, setDragEnding] = useState(false);
-  const [heightOfSpaceTimeChart, setHeightOfSpaceTimeChart] = useState(CHART_MIN_HEIGHT);
-  const [initialHeightOfSpaceTimeChart, setInitialHeightOfSpaceTimeChart] =
+  const [heightOfSpaceTimeChart, setHeightOfSpaceTimeChart] = useState(
+    initialHeightOfSpaceTimeChart || CHART_MIN_HEIGHT
+  );
+
+  const [baseHeightOfSpaceTimeChart, setBaseHeightOfSpaceTimeChart] =
     useState(heightOfSpaceTimeChart);
 
   const handleKey = ({ key }) => {
@@ -136,7 +140,7 @@ export default function SpaceTimeChart(props) {
   };
 
   // D3 Operations
-// HORREUR
+  // HORREUR
   useEffect(() => {
     //setDataSimulation(createTrain(dispatch, keyValues, simulation.trains, t));
     setTimeout(() => {
@@ -233,7 +237,7 @@ export default function SpaceTimeChart(props) {
     };
   }, []);
 
-  console.log(dataSimulation)
+  console.log(dataSimulation);
 
   return (
     <Rnd
@@ -248,12 +252,12 @@ export default function SpaceTimeChart(props) {
       enableResizing={{
         bottom: true,
       }}
-      onResizeStart={() => setInitialHeightOfSpaceTimeChart(heightOfSpaceTimeChart)}
+      onResizeStart={() => setBaseHeightOfSpaceTimeChart(heightOfSpaceTimeChart)}
       onResize={(_e, _dir, _refToElement, delta) => {
-        setHeightOfSpaceTimeChart(initialHeightOfSpaceTimeChart + delta.height);
+        setHeightOfSpaceTimeChart(baseHeightOfSpaceTimeChart + delta.height);
       }}
       onResizeStop={() => {
-        dispatchUpdateMustRedraw(true)
+        dispatchUpdateMustRedraw(true);
       }}
     >
       <div className="spacetimechart-container"></div>
