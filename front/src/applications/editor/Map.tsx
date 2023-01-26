@@ -184,6 +184,7 @@ const MapUnplugged: FC<PropsWithChildren<MapProps>> = ({
           attributionControl={false}
           touchZoomRotate
           doubleClickZoom={false}
+          cooperativeGestures
           interactive
           cursor={cursor}
           interactiveLayerIds={interactiveLayerIDs}

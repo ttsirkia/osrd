@@ -86,6 +86,7 @@ export default function Map(props) {
       onClick={onFeatureClick}
       interactiveLayerIds={['chartis/tracks-geo/main']}
       touchZoomRotate
+      cooperativeGestures
     >
       <VirtualLayers />
       <AttributionControl className="attribution-control" customAttribution="©SNCF Réseau" />

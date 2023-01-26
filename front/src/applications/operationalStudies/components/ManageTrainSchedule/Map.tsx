@@ -186,6 +186,7 @@ function Map() {
         interactiveLayerIds={defineInteractiveLayers()}
         touchZoomRotate
         data-testid="map"
+        cooperativeGestures
       >
         <VirtualLayers />
         <AttributionControl position="bottom-right" customAttribution="©SNCF Réseau" />
