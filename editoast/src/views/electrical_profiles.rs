@@ -44,10 +44,12 @@ async fn get(
     let electrical_profile_set = electrical_profile_set.into_inner();
     block(move || {
         let mut conn = db_pool.get().expect("Failed to get DB connection");
-        Ok(Json(ElectricalProfileSet::retrieve_data(
-            &mut conn,
-            electrical_profile_set,
-        )?))
+        Ok(Json(
+            ElectricalProfileSet::retrieve_data(
+                &mut conn,
+                electrical_profile_set,
+            )?
+        ))
     })
     .await
     .unwrap()
