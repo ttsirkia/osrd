@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useContext, useEffect, useState } from 'react';
 import { updateAllowancesSettings } from 'reducers/osrdsimulation/actions';
-import { useSelector } from 'react-redux';
+
 
 import DotsLoader from 'common/DotsLoader/DotsLoader';
 import { FaTrash } from 'react-icons/fa';
@@ -27,11 +27,11 @@ function EmptyLine(props) {
     marecoBeginPosition,
     marecoEndPosition,
     defaultDistributionId,
+    simulation,
+    selectedTrain
   } = props;
   const { openModal } = useContext(ModalContext);
 
-  const { selectedTrain } = useSelector((state) => state.osrdsimulation);
-  const simulation = useSelector((state) => state.osrdsimulation.simulation.present);
   const allowanceNewDatas =
     allowanceType === 'engineering'
       ? {
@@ -415,6 +415,8 @@ export default function Allowances(props) {
               allowances={allowances}
               distribution="mareco"
               allowanceTypes={allowanceTypes}
+              simulation={simulation}
+              selectedTrain={selectedTrain}
             />
           )}
 
@@ -450,6 +452,8 @@ export default function Allowances(props) {
             allowances={allowances}
             allowanceType="engineering"
             allowanceTypes={allowanceTypes}
+            selectedTrain={selectedTrain}
+            simulation={simulation}
           />
           {rawExtensions.map(() => (
             <EmptyLine
@@ -460,6 +464,8 @@ export default function Allowances(props) {
               allowances={allowances}
               allowanceTypes={allowanceTypes}
               allowanceType="engineering"
+              selectedTrain={selectedTrain}
+              simulation={simulation}
               key={nextId()}
             />
           ))}
@@ -490,6 +496,8 @@ EmptyLine.propTypes = {
   // eslint-disable-next-line react/require-default-props
   marecoEndPosition: PropTypes.number,
   defaultDistributionId: PropTypes.string.isRequired,
+  selectedTrain: PropTypes.number.isRequired,
+  simulation: PropTypes.object.isRequired
 };
 EmptyLine.defaultProps = {
   allowances: [],
