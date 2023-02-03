@@ -65,9 +65,16 @@ function Signals(props: PlatformProps) {
     if (mapRef && mapRef.current) {
       const selectedTrainConsolidatedSimulation = consolidatedSimulation[selectedTrain];
 
+      const mapBounds = mapRef.current.getBounds();
+
       const renderedDynamicStopsFeatures = mapRef.current.queryRenderedFeatures(
-        mapRef.current.getBounds().toArray() as [[number, number], [number, number]],
-        { layers: dynamicLayersIds }
+        [
+          mapRef.current.project(mapBounds.getSouthWest()),
+          mapRef.current.project(mapBounds.getNorthEast()),
+        ],
+        {
+          layers: dynamicLayersIds,
+        }
       ); // can' be memoïzed :(
 
       const tmpRedIds: string[] = [];
