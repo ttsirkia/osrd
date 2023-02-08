@@ -1,12 +1,12 @@
 use crate::diesel::{QueryDsl, RunQueryDsl};
 use crate::error::EditoastError;
 use crate::error::Result;
-use crate::schema::electrical_profiles::ElectricalProfileSet as ElectricalProfileSetSchema;
+use crate::schema::electrical_profiles::ElectricalProfileSetData;
 use crate::tables::osrd_infra_electricalprofileset;
 use crate::tables::osrd_infra_electricalprofileset::dsl;
 use crate::DbPool;
 use actix_web::dev::HttpServiceFactory;
-use actix_web::get;
+use actix_web::{get, post};
 use actix_web::http::StatusCode;
 use actix_web::web::{self, block, Data, Json, Path};
 use diesel::result::Error as DieselError;
@@ -14,6 +14,8 @@ use diesel::PgConnection;
 use serde::Serialize;
 use serde_json::{json, Map, Value as JsonValue};
 use thiserror::Error;
+use std::collections::HashMap;
+
 
 /// Returns `/electrical_profile_set` routes
 pub fn routes() -> impl HttpServiceFactory {
@@ -40,7 +42,7 @@ async fn list(db_pool: Data<DbPool>) -> Result<Json<Vec<ElectricalProfileSetMeta
 async fn get(
     db_pool: Data<DbPool>,
     electrical_profile_set: Path<i64>,
-) -> Result<Json<ElectricalProfileSetSchema>> {
+) -> Result<Json<ElectricalProfileSetData>> {
     let electrical_profile_set = electrical_profile_set.into_inner();
     block(move || {
         let mut conn = db_pool.get().expect("Failed to get DB connection");
@@ -55,12 +57,30 @@ async fn get(
     .unwrap()
 }
 
+/// Return a specific set of electrical profiles
+#[post("/")]
+async fn post_electrical_profile(
+    db_pool: Data<DbPool>,
+    name: Path<String>,
+    data: Json<ElectricalProfileSet>
+) -> Result<Json<ElectricalProfileSet>> {
+    let data = data.into_inner();
+    let conn = db_pool.get().await?;
+    let electrical_profile_set = ElectricalProfileSet::create_electrical_profile_set(
+        conn,
+        name.into_inner(),
+        data,
+    )?;
+
+    Ok(Json(electrical_profile_set))
+}
+
 /// Return the electrical profile value order for this set
 #[get("/{electrical_profile_set}/level_order")]
 async fn get_level_order(
     db_pool: Data<DbPool>,
     electrical_profile_set: Path<i64>,
-) -> Result<Json<JsonValue>> {
+) -> Result<Json<HashMap<String, Vec<String>>>> {
     let electrical_profile_set = electrical_profile_set.into_inner();
     block(move || {
         let mut conn = db_pool.get().expect("Failed to get DB connection");
@@ -82,12 +102,19 @@ pub struct ElectricalProfileSetMetaData {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, Queryable, Insertable, Identifiable)]
+#[derive(Debug, PartialEq, Queryable, Identifiable)]
 #[diesel(table_name = osrd_infra_electricalprofileset)]
 pub struct ElectricalProfileSet {
     pub id: i64,
     pub name: String,
-    pub data: JsonValue,
+    pub data: ElectricalProfileSetData,
+}
+
+#[derive(Debug, PartialEq, Insertable)]
+#[diesel(table_name = osrd_infra_electricalprofileset)]
+pub struct NewElectricalProfileSet {
+    pub name: String,
+    pub data: ElectricalProfileSetData,
 }
 
 impl ElectricalProfileSet {
@@ -102,12 +129,29 @@ impl ElectricalProfileSet {
         }
     }
 
+    fn create_electrical_profile_set(
+        conn: &mut PgConnection,
+        name: String,
+        data: Json<ElectricalProfileSetData>,
+    ) -> Result<ElectricalProfileSet> {
+        let ep_set = NewElectricalProfileSet {
+            name,
+            data: data.into_inner(),
+        };
+        match diesel::insert_into(dsl::osrd_infra_electricalprofileset)
+            .values(&ep_set)
+            .execute(conn)
+            .unwrap() {
+
+        }
+    }
+
     pub fn retrieve_data(
         conn: &mut PgConnection,
         ep_set_id: i64,
-    ) -> Result<ElectricalProfileSetSchema> {
+    ) -> Result<ElectricalProfileSetData> {
         let ep_set_wrapper = Self::retrieve(conn, ep_set_id)?;
-        match serde_json::from_value::<ElectricalProfileSetSchema>(ep_set_wrapper.data) {
+        match serde_json::from_value::<ElectricalProfileSetData>(ep_set_wrapper.data) {
             Ok(ep_set) => Ok(ep_set),
             Err(e) => Err(ElectricalProfilesError::InternalError(e.to_string()).into()),
         }
@@ -170,7 +214,6 @@ mod tests {
     use diesel::result::Error;
 
     use crate::tables::osrd_infra_electricalprofileset::dsl;
-    use serde_json::json;
 
     use super::ElectricalProfileSet;
 
@@ -182,10 +225,34 @@ mod tests {
             let ep_set = ElectricalProfileSet {
                 id: 1,
                 name: "test".to_string(),
-                data: json!({
-                    "level_order": "placeholder_level_order",
-                    "levels": "placeholder_levels",
-                }),
+                data: r#"
+                {
+                    "levels": [{ 
+                        "value": "A", 
+                        "power_class": 1, 
+                        "track_ranges": [{
+                            "track": "603ebc9c-6667-11e3-81ff-01f464e0362d",
+                            "begin": 2213.0,
+                            "end": 3121.0
+                        }]
+                    }],
+                    "level_order": {
+                      "1500": [
+                          "O",
+                          "A",
+                          "A1",
+                          "B",
+                          "B1",
+                          "C",
+                          "D"
+                      ],
+                      "25000": [
+                          "25000",
+                          "22500",
+                          "20000"
+                      ]
+                    }
+                }"#.to_string()
             };
             diesel::insert_into(dsl::osrd_infra_electricalprofileset)
                 .values(&ep_set)
@@ -195,10 +262,34 @@ mod tests {
             let ep_set_2 = ElectricalProfileSet {
                 id: 2,
                 name: "test_2".to_string(),
-                data: json!({
-                    "level_order": "placeholder_level_order_2",
-                    "levels": "placeholder_levels_2",
-                }),
+                data: r#"
+                {
+                    "levels": [{ 
+                        "value": "B", 
+                        "power_class": 1, 
+                        "track_ranges": [{
+                            "track": "603ebc9c-6667-11e3-81ff-01f464e0362d",
+                            "begin": 2213.0,
+                            "end": 3121.0
+                        }]
+                    }],
+                    "level_order": {
+                      "1500": [
+                          "O",
+                          "A",
+                          "A1",
+                          "B",
+                          "B1",
+                          "C",
+                          "D"
+                      ],
+                      "25000": [
+                          "25000",
+                          "22500",
+                          "20000"
+                      ]
+                    }
+                }"#.to_string(),
             };
             diesel::insert_into(dsl::osrd_infra_electricalprofileset)
                 .values(&ep_set_2)
@@ -261,6 +352,48 @@ mod tests {
     }
 
     #[actix_test]
+    async fn test_post_electrical_profile() {
+        let app = create_test_service().await;
+        let electrical_profile_json = 
+        r#"
+        {
+            "levels": [{ 
+                "value": "B", 
+                "power_class": 1, 
+                "track_ranges": [{
+                    "track": "603ebc9c-6667-11e3-81ff-01f464e0362d",
+                    "begin": 2213.0,
+                    "end": 3121.0
+                }]
+            }],
+            "level_order": {
+              "1500": [
+                  "O",
+                  "A",
+                  "A1",
+                  "B",
+                  "B1",
+                  "C",
+                  "D"
+              ],
+              "25000": [
+                  "25000",
+                  "22500",
+                  "20000"
+              ]
+            }
+        }"#;
+        let req = TestRequest::post()
+            .uri("/electrical_profile_set/?name=tictic")
+            .data(electrical_profile_json)
+            .append_header(ContentType::json())
+            .to_request();
+
+        let response = call_service(&app, req).await;
+        assert_eq!(response.status(), StatusCode::Created);
+    }
+
+    #[actix_test]
     async fn test_view_get_level_order_none() {
         let app = create_test_service().await;
         let req = TestRequest::get()
@@ -270,4 +403,5 @@ mod tests {
         let response = call_service(&app, req).await;
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
+    
 }
