@@ -8,10 +8,10 @@ use crate::DbPool;
 use actix_web::dev::HttpServiceFactory;
 use actix_web::{get, post};
 use actix_web::http::StatusCode;
-use actix_web::web::{self, block, Data, Json, Path};
+use actix_web::web::{self, block, Data, Json, Path, Query};
 use diesel::result::Error as DieselError;
 use diesel::PgConnection;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use serde_json::{json, Map, Value as JsonValue};
 use thiserror::Error;
 use std::collections::HashMap;
@@ -57,22 +57,23 @@ async fn get(
     .unwrap()
 }
 
-/// Return a specific set of electrical profiles
 #[post("/")]
 async fn post_electrical_profile(
     db_pool: Data<DbPool>,
-    name: Path<String>,
-    data: Json<ElectricalProfileSet>
+    name: Query<String>,
+    data: Json<ElectricalProfileSetData>,
 ) -> Result<Json<ElectricalProfileSet>> {
-    let data = data.into_inner();
-    let conn = db_pool.get().await?;
-    let electrical_profile_set = ElectricalProfileSet::create_electrical_profile_set(
-        conn,
-        name.into_inner(),
-        data,
-    )?;
-
-    Ok(Json(electrical_profile_set))
+    block(move || {
+        let mut conn = db_pool.get().expect("Failed to get DB connection");
+        let electrical_profile_set = ElectricalProfileSet::create_electrical_profile_set(
+            &mut conn,
+            name.into_inner(),
+            data.into_inner(),
+        )?;
+        Ok(Json(electrical_profile_set))
+    })
+    .await
+    .unwrap()
 }
 
 /// Return the electrical profile value order for this set
@@ -102,7 +103,7 @@ pub struct ElectricalProfileSetMetaData {
     pub name: String,
 }
 
-#[derive(Debug, PartialEq, Queryable, Identifiable)]
+#[derive(Debug, PartialEq, Queryable, Insertable, Identifiable, Serialize, Deserialize)]
 #[diesel(table_name = osrd_infra_electricalprofileset)]
 pub struct ElectricalProfileSet {
     pub id: i64,
@@ -110,7 +111,7 @@ pub struct ElectricalProfileSet {
     pub data: ElectricalProfileSetData,
 }
 
-#[derive(Debug, PartialEq, Insertable)]
+#[derive(Debug, PartialEq, Insertable, Queryable)]
 #[diesel(table_name = osrd_infra_electricalprofileset)]
 pub struct NewElectricalProfileSet {
     pub name: String,
@@ -132,17 +133,18 @@ impl ElectricalProfileSet {
     fn create_electrical_profile_set(
         conn: &mut PgConnection,
         name: String,
-        data: Json<ElectricalProfileSetData>,
+        data: ElectricalProfileSetData,
     ) -> Result<ElectricalProfileSet> {
         let ep_set = NewElectricalProfileSet {
             name,
-            data: data.into_inner(),
+            data,
         };
         match diesel::insert_into(dsl::osrd_infra_electricalprofileset)
             .values(&ep_set)
             .execute(conn)
             .unwrap() {
-
+                Ok(ep_set) => Ok(ep_set),
+                Err(e) => Err(ElectricalProfilesError::InternalError(e.to_string()).into()),
         }
     }
 
@@ -212,47 +214,50 @@ mod tests {
     use actix_web::test::TestRequest;
     use diesel::prelude::*;
     use diesel::result::Error;
+    use serde_json::from_str;
 
     use crate::tables::osrd_infra_electricalprofileset::dsl;
 
     use super::ElectricalProfileSet;
+    use crate::schema::electrical_profiles::ElectricalProfileSetData;
+
 
     fn test_ep_set_transaction(fn_test: fn(&mut PgConnection, ElectricalProfileSet)) {
         let mut conn = PgConnection::establish(&PostgresConfig::default().url()).unwrap();
         conn.test_transaction::<_, Error, _>(|conn| {
             diesel::delete(dsl::osrd_infra_electricalprofileset).execute(conn)?;
-
+            let data = from_str(r#"
+            {
+                "levels": [{ 
+                    "value": "A", 
+                    "power_class": 1, 
+                    "track_ranges": [{
+                        "track": "603ebc9c-6667-11e3-81ff-01f464e0362d",
+                        "begin": 2213.0,
+                        "end": 3121.0
+                    }]
+                }],
+                "level_order": {
+                  "1500": [
+                      "O",
+                      "A",
+                      "A1",
+                      "B",
+                      "B1",
+                      "C",
+                      "D"
+                  ],
+                  "25000": [
+                      "25000",
+                      "22500",
+                      "20000"
+                  ]
+                }
+            }"#);
             let ep_set = ElectricalProfileSet {
                 id: 1,
                 name: "test".to_string(),
-                data: r#"
-                {
-                    "levels": [{ 
-                        "value": "A", 
-                        "power_class": 1, 
-                        "track_ranges": [{
-                            "track": "603ebc9c-6667-11e3-81ff-01f464e0362d",
-                            "begin": 2213.0,
-                            "end": 3121.0
-                        }]
-                    }],
-                    "level_order": {
-                      "1500": [
-                          "O",
-                          "A",
-                          "A1",
-                          "B",
-                          "B1",
-                          "C",
-                          "D"
-                      ],
-                      "25000": [
-                          "25000",
-                          "22500",
-                          "20000"
-                      ]
-                    }
-                }"#.to_string()
+                data: from_str<ElectricalProfileSetData>()
             };
             diesel::insert_into(dsl::osrd_infra_electricalprofileset)
                 .values(&ep_set)
