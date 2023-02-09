@@ -14,7 +14,10 @@ import ORSD_GET_SAMPLE_DATA from 'applications/operationalStudies/components/Sim
 import { CgLoadbar } from 'react-icons/cg';
 import ChartModal from 'applications/operationalStudies/components/SimulationResults/ChartModal';
 import { GiResize } from 'react-icons/gi';
-import { LIST_VALUES_NAME_SPACE_TIME } from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
+import {
+  KEY_VALUES_FOR_SPACE_TIME_CHART,
+  LIST_VALUES_NAME_SPACE_TIME,
+} from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
 import PropTypes from 'prop-types';
 import createTrain from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/createTrain';
 
@@ -61,7 +64,6 @@ export default function SpaceTimeChart(props) {
     initialHeightOfSpaceTimeChart,
   } = props;
 
-  const keyValues = ['time', 'position'];
   const [rotate, setRotate] = useState(false);
   const [chart, setChart] = useState(undefined);
   const [resetChart, setResetChart] = useState(false);
@@ -119,7 +121,8 @@ export default function SpaceTimeChart(props) {
 
   useEffect(() => {
     const trains = dataSimulation?.trains || simulation.trains;
-    const newDataSimulation = createTrain(dispatch, keyValues, trains, t);
+    const newDataSimulation = createTrain(dispatch, KEY_VALUES_FOR_SPACE_TIME_CHART, trains, t);
+
     if (newDataSimulation) {
       drawAllTrains(
         resetChart,
@@ -127,7 +130,7 @@ export default function SpaceTimeChart(props) {
         false,
         chart,
         heightOfSpaceTimeChart,
-        keyValues,
+        KEY_VALUES_FOR_SPACE_TIME_CHART,
         ref,
         rotate,
         dispatch,
@@ -175,8 +178,10 @@ export default function SpaceTimeChart(props) {
       // add behaviour on zoom and mousemove/mouseover/wheel on the new chart
       isolatedEnableInteractivity(
         chart,
-        createTrain(dispatch, keyValues, dataSimulation.trains, t)[selectedTrain],
-        keyValues,
+        createTrain(dispatch, KEY_VALUES_FOR_SPACE_TIME_CHART, dataSimulation.trains, t)[
+          selectedTrain
+        ],
+        KEY_VALUES_FOR_SPACE_TIME_CHART,
         LIST_VALUES_NAME_SPACE_TIME,
         positionValues,
         rotate,
@@ -196,7 +201,7 @@ export default function SpaceTimeChart(props) {
       // ADN: too heavy, dispatch on release (dragEnd), careful with dispatch !
       const newPositionValues = interpolateOnTime(
         dataSimulation[selectedTrain],
-        keyValues,
+        KEY_VALUES_FOR_SPACE_TIME_CHART,
         LIST_VALUES_NAME_SPACE_TIME,
         timePosition
       );
@@ -211,7 +216,7 @@ export default function SpaceTimeChart(props) {
       traceVerticalLine(
         chart,
         dataSimulation[selectedTrain],
-        keyValues,
+        KEY_VALUES_FOR_SPACE_TIME_CHART,
         LIST_VALUES_NAME_SPACE_TIME,
         positionValues,
         'headPosition',

@@ -13,6 +13,7 @@ import {
   SignalAspect,
   MergedDataPoint,
 } from 'reducers/osrdsimulation/types';
+import { TIME } from '../simulationResultsConsts';
 
 export function sec2d3datetime(time: number) {
   return d3.timeParse('%H:%M:%S')(sec2time(time));
@@ -332,3 +333,5 @@ export const interpolateOnTime = (
 
   return positionInterpolated;
 };
+
+export const isGET = (keyValues: string[]) => keyValues[0] === TIME;
