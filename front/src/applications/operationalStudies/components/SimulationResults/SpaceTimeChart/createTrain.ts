@@ -28,8 +28,6 @@ export default function createTrain(
 ): SimulationTrain[] {
   // Prepare data
   const dataSimulation = simulationTrains.map((train: Train, trainNumber: number) => {
-
-
     const dataSimulationTrain: SimulationTrain = {
       id: train.id,
       isStdcm: train.isStdcm,

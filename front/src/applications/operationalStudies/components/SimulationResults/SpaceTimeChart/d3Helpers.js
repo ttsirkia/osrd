@@ -41,34 +41,34 @@ const drawAxisTitle = (chart, rotate) => {
 
 // eslint-disable-next-line default-param-last
 const drawAllTrains = (
-  reset,
-  newDataSimulation,
-  mustRedraw,
+  allowancesSettings,
   chart,
-  heightOfSpaceTimeChart,
-  keyValues,
-  ref,
-  rotate,
-  dispatch,
   CHART_ID,
-  simulation,
-  selectedTrain,
-  positionValues,
-  setChart,
-  setResetChart,
-  setYPosition,
-  setZoomLevel,
-  setDragEnding,
-  setDragOffset,
-  yPosition,
-  zoomLevel,
-  selectedProjection,
-  dispatchUpdateMustRedraw,
+  dispatch,
   dispatchUpdateChart,
   dispatchUpdateContextMenu,
-  allowancesSettings,
+  dispatchUpdateMustRedraw,
+  heightOfSpaceTimeChart,
+  keyValues,
+  newDataSimulation,
+  mustRedraw,
+  positionValues,
+  ref,
+  reset,
+  rotate,
+  selectedProjection,
+  selectedTrain,
+  setChart,
+  setDragEnding,
+  setDragOffset,
+  setResetChart,
   setSelectedTrain,
+  setYPosition,
+  setZoomLevel,
+  simulation,
   simulationIsPlaying,
+  yPosition,
+  zoomLevel,
   // TODO: romve forceRedraw (same as mustRedraw)
   forceRedraw = false
 ) => {
@@ -85,6 +85,7 @@ const drawAllTrains = (
       rotate
     );
 
+    // a quoi sert ContextMenu ? Pourquoi undefined ici ?
     chartLocal.svg.on('click', () => {
       dispatchUpdateContextMenu(undefined);
     });
@@ -94,19 +95,19 @@ const drawAllTrains = (
     drawAxisTitle(chartLocal, rotate);
     currentDataSimulation.forEach((train, idx) => {
       drawTrain(
+        allowancesSettings,
         chartLocal,
-        dispatch,
         train,
+        dispatch,
         train.id === selectedProjection?.id,
         idx === selectedTrain,
+        train.isStdcm,
         keyValues,
-        allowancesSettings,
         rotate,
         setDragEnding,
         setDragOffset,
-        simulation,
-        train.isStdcm,
-        setSelectedTrain
+        setSelectedTrain,
+        simulation
       );
     });
     setChart(chartLocal);

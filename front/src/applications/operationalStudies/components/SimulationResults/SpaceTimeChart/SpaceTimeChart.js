@@ -44,45 +44,46 @@ const CHART_MIN_HEIGHT = 250;
  */
 export default function SpaceTimeChart(props) {
   const ref = useRef();
+  const rndContainerRef = useRef(null);
   const { t } = useTranslation(['allowances']);
+
   const {
     allowancesSettings,
-    positionValues,
-    selectedProjection,
-    inputSelectedTrain,
-    timePosition,
-    simulation,
-    simulationIsPlaying,
     dispatch,
-    onOffsetTimeByDragging,
-    onSetBaseHeightOfSpaceTimeChart,
-    dispatchUpdateMustRedraw,
-    dispatchUpdatePositionValues,
     dispatchUpdateChart,
     dispatchUpdateContextMenu,
+    dispatchUpdateMustRedraw,
+    dispatchUpdatePositionValues,
     dispatchUpdateTimePositionValues,
     initialHeightOfSpaceTimeChart,
+    inputSelectedTrain,
+    onOffsetTimeByDragging,
+    onSetBaseHeightOfSpaceTimeChart,
+    positionValues,
+    selectedProjection,
+    simulation,
+    simulationIsPlaying,
+    timePosition,
   } = props;
 
-  const [rotate, setRotate] = useState(false);
+  const [baseHeightOfSpaceTimeChart, setBaseHeightOfSpaceTimeChart] = useState(
+    initialHeightOfSpaceTimeChart
+  );
   const [chart, setChart] = useState(undefined);
-  const [resetChart, setResetChart] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [yPosition, setYPosition] = useState(0);
+  // dataSimulation: trainSimulation[]
   const [dataSimulation, setDataSimulation] = useState(undefined);
-  const [showModal, setShowModal] = useState('');
   const [dragOffset, setDragOffset] = useState(0);
   // TODO: remove setDragEnding without creating a new error in the console
   const [, setDragEnding] = useState(false);
-  const [selectedTrain, setSelectedTrain] = useState(inputSelectedTrain);
   const [heightOfSpaceTimeChart, setHeightOfSpaceTimeChart] = useState(
     initialHeightOfSpaceTimeChart
   );
-
-  const rndContainerRef = useRef(null);
-
-  const [baseHeightOfSpaceTimeChart, setBaseHeightOfSpaceTimeChart] =
-    useState(heightOfSpaceTimeChart);
+  const [resetChart, setResetChart] = useState(false);
+  const [rotate, setRotate] = useState(false);
+  const [selectedTrain, setSelectedTrain] = useState(inputSelectedTrain);
+  const [showModal, setShowModal] = useState('');
+  const [yPosition, setYPosition] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   // Everything should be done by Hoc, has no direct effect on Comp behavior
   const offsetTimeByDragging = useCallback(
@@ -121,38 +122,39 @@ export default function SpaceTimeChart(props) {
 
   useEffect(() => {
     const trains = dataSimulation?.trains || simulation.trains;
+    // pas besoin de createTrain ici, car on utilise uniquement des informations déjà contenues dans le train actuel
     const newDataSimulation = createTrain(dispatch, KEY_VALUES_FOR_SPACE_TIME_CHART, trains, t);
 
     if (newDataSimulation) {
       drawAllTrains(
-        resetChart,
-        newDataSimulation,
-        false,
+        allowancesSettings,
         chart,
-        heightOfSpaceTimeChart,
-        KEY_VALUES_FOR_SPACE_TIME_CHART,
-        ref,
-        rotate,
-        dispatch,
         CHART_ID,
-        simulation,
-        selectedTrain,
-        positionValues,
-        setChart,
-        setResetChart,
-        setYPosition,
-        setZoomLevel,
-        setDragEnding,
-        setDragOffset,
-        yPosition,
-        zoomLevel,
-        selectedProjection,
-        dispatchUpdateMustRedraw,
+        dispatch,
         dispatchUpdateChart,
         dispatchUpdateContextMenu,
-        allowancesSettings,
+        dispatchUpdateMustRedraw,
+        heightOfSpaceTimeChart,
+        KEY_VALUES_FOR_SPACE_TIME_CHART,
+        newDataSimulation,
+        false,
+        positionValues,
+        ref,
+        resetChart,
+        rotate,
+        selectedProjection,
+        selectedTrain,
+        setChart,
+        setDragEnding,
+        setDragOffset,
+        setResetChart,
         setSelectedTrain,
+        setYPosition,
+        setZoomLevel,
+        simulation,
         simulationIsPlaying,
+        yPosition,
+        zoomLevel,
         true
       );
     }
@@ -299,36 +301,37 @@ export default function SpaceTimeChart(props) {
 
 SpaceTimeChart.propTypes = {
   allowancesSettings: PropTypes.any,
-  positionValues: PropTypes.any,
-  selectedProjection: PropTypes.any.isRequired,
-  inputSelectedTrain: PropTypes.any,
-  timePosition: PropTypes.any,
-  simulation: PropTypes.any,
-  simulationIsPlaying: PropTypes.bool,
   dispatch: PropTypes.any,
-  onOffsetTimeByDragging: PropTypes.func,
-  onSetBaseHeightOfSpaceTimeChart: PropTypes.any,
-  dispatchUpdateMustRedraw: PropTypes.func,
-  dispatchUpdatePositionValues: PropTypes.any,
   dispatchUpdateChart: PropTypes.any,
   dispatchUpdateContextMenu: PropTypes.any,
+  dispatchUpdateMustRedraw: PropTypes.func,
+  dispatchUpdatePositionValues: PropTypes.any,
   dispatchUpdateTimePositionValues: PropTypes.any,
-  initialHeightOfSpaceTimeChart: PropTypes.any.isRequired,
+  initialHeightOfSpaceTimeChart: PropTypes.any,
+  inputSelectedTrain: PropTypes.any,
+  positionValues: PropTypes.any,
+  selectedProjection: PropTypes.any.isRequired,
+  simulation: PropTypes.any,
+  simulationIsPlaying: PropTypes.bool,
+  timePosition: PropTypes.any,
+  onOffsetTimeByDragging: PropTypes.func,
+  onSetBaseHeightOfSpaceTimeChart: PropTypes.any,
 };
 
 SpaceTimeChart.defaultProps = {
-  simulation: ORSD_GET_SAMPLE_DATA.simulation.present,
-  simulationIsPlaying: false,
   allowancesSettings: ORSD_GET_SAMPLE_DATA.allowancesSettings,
   dispatch: () => {},
-  positionValues: ORSD_GET_SAMPLE_DATA.positionValues,
+  dispatchUpdateChart: () => {},
+  dispatchUpdateContextMenu: () => {},
+  dispatchUpdateMustRedraw: () => {},
+  dispatchUpdatePositionValues: () => {},
+  dispatchUpdateTimePositionValues: () => {},
   inputSelectedTrain: ORSD_GET_SAMPLE_DATA.selectedTrain,
-  timePosition: ORSD_GET_SAMPLE_DATA.timePosition,
+  initialHeightOfSpaceTimeChart: 400,
   onOffsetTimeByDragging: () => {},
   onSetBaseHeightOfSpaceTimeChart: () => {},
-  dispatchUpdateMustRedraw: () => {},
-  dispatchUpdateChart: () => {},
-  dispatchUpdatePositionValues: () => {},
-  dispatchUpdateContextMenu: () => {},
-  dispatchUpdateTimePositionValues: () => {},
+  positionValues: ORSD_GET_SAMPLE_DATA.positionValues,
+  simulation: ORSD_GET_SAMPLE_DATA.simulation.present,
+  simulationIsPlaying: false,
+  timePosition: ORSD_GET_SAMPLE_DATA.timePosition,
 };

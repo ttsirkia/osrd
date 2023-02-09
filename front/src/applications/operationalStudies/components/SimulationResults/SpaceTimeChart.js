@@ -141,19 +141,19 @@ export default function SpaceTimeChart(props) {
       drawAxisTitle(chartLocal, rotate);
       currentDataSimulation.forEach((train, idx) => {
         drawTrain(
+          allowancesSettings,
           chartLocal,
-          dispatch,
           train,
+          dispatch,
           train.id === selectedProjection?.id,
           idx === selectedTrain,
+          train.isStdcm,
           keyValues,
-          allowancesSettings,
           rotate,
           setDragEnding,
           setDragOffset,
-          simulation,
-          train.isStdcm,
-          setTmpSelectedTrain
+          setTmpSelectedTrain,
+          simulation
         );
       });
       enableInteractivity(

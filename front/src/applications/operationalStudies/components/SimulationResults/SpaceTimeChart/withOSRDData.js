@@ -30,6 +30,7 @@ const withOSRDData = (Component) =>
     const allowancesSettings = useSelector(getAllowancesSettings);
     const positionValues = useSelector(getPositionValues);
     const selectedTrain = useSelector(getSelectedTrain);
+    // à quoi correspond selectedProjection ?
     const selectedProjection = useSelector(getSelectedProjection);
     const timePosition = useSelector(getTimePosition);
     const simulation = useSelector(getPresentSimulation);
@@ -67,19 +68,19 @@ const withOSRDData = (Component) =>
       <Component
         {...props}
         allowancesSettings={allowancesSettings}
-        simulationIsPlaying={isPlaying}
-        positionValues={positionValues}
         dispatch={dispatch}
-        simulation={simulation}
-        inputSelectedTrain={selectedTrain}
-        selectedProjection={selectedProjection}
-        timePosition={timePosition}
-        onOffsetTimeByDragging={onOffsetTimeByDragging}
-        dispatchUpdateMustRedraw={dispatchUpdateMustRedraw}
         dispatchUpdateContextMenu={dispatchUpdateContextMenu}
         dispatchUpdateChart={dispatchUpdateChart}
+        dispatchUpdateMustRedraw={dispatchUpdateMustRedraw}
         dispatchUpdatePositionValues={dispatchUpdatePositionValues}
         dispatchUpdateTimePositionValues={dispatchUpdateTimePositionValues}
+        inputSelectedTrain={selectedTrain}
+        onOffsetTimeByDragging={onOffsetTimeByDragging}
+        positionValues={positionValues}
+        selectedProjection={selectedProjection}
+        simulation={simulation}
+        simulationIsPlaying={isPlaying}
+        timePosition={timePosition}
       />
     );
   };

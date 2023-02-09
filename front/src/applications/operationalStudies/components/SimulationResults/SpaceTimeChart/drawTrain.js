@@ -16,19 +16,19 @@ import {
 } from 'reducers/osrdsimulation/actions';
 
 export default function drawTrain(
+  allowancesSettings,
   chart,
-  dispatch,
   dataSimulation,
+  dispatch,
   isPathSelected,
   isSelected,
+  isStdcm,
   keyValues,
-  allowancesSettings,
   rotate,
   setDragEnding,
   setDragOffset,
-  simulation,
-  isStdcm,
-  setSelectedTrain
+  setSelectedTrain,
+  simulation
 ) {
   const groupID = `spaceTime-${dataSimulation.trainNumber}`;
 

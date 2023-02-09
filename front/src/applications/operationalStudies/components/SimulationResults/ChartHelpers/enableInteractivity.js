@@ -169,11 +169,11 @@ const updateChart = (chart, keyValues, rotate, event) => {
 // Factorizes func to update VerticalLine on 3 charts: SpaceTime, SpeedSpaceChart, SpaceCurvesSlopes
 export const traceVerticalLine = (
   chart,
-  dataSimulation,
+  dataSimulation, // not used
   keyValues,
   listValues,
   positionValues,
-  refValueName,
+  refValueName, // not used
   rotate,
   timePosition
 ) => {
