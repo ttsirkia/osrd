@@ -16,9 +16,7 @@ import {
   LIST_VALUES_NAME_SPACE_TIME,
 } from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
 import PropTypes from 'prop-types';
-import createTrain from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/createTrain';
-
-import { useTranslation } from 'react-i18next';
+import { isolatedCreateTrain as createTrain } from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/createTrain';
 
 import { drawAllTrains } from 'applications/operationalStudies/components/SimulationResults/SpaceTimeChart/d3Helpers';
 
@@ -42,14 +40,14 @@ const CHART_MIN_HEIGHT = 250;
 export default function SpaceTimeChart(props) {
   const ref = useRef();
   const rndContainerRef = useRef(null);
-  const { t } = useTranslation(['allowances']);
 
   const {
     allowancesSettings,
-    dispatch,
     dispatchUpdateChart,
     dispatchUpdateContextMenu,
+    dispatchUpdateDepartureArrivalTimes,
     dispatchUpdateMustRedraw,
+    dispatchUpdateSelectedTrain,
     dispatchUpdateTimePositionValues,
     initialHeightOfSpaceTimeChart,
     inputSelectedTrain,
@@ -139,21 +137,16 @@ export default function SpaceTimeChart(props) {
 
   useEffect(() => {
     if (trainSimulations) {
-      const trainsToDraw = createTrain(
-        dispatch,
-        KEY_VALUES_FOR_SPACE_TIME_CHART,
-        trainSimulations,
-        t
-      );
-
+      const trainsToDraw = createTrain(KEY_VALUES_FOR_SPACE_TIME_CHART, trainSimulations);
       drawAllTrains(
         allowancesSettings,
         chart,
         CHART_ID,
-        dispatch,
         dispatchUpdateChart,
         dispatchUpdateContextMenu,
+        dispatchUpdateDepartureArrivalTimes,
         dispatchUpdateMustRedraw,
+        dispatchUpdateSelectedTrain,
         heightOfSpaceTimeChart,
         KEY_VALUES_FOR_SPACE_TIME_CHART,
         false,
@@ -186,7 +179,7 @@ export default function SpaceTimeChart(props) {
     if (trainSimulations) {
       isolatedEnableInteractivity(
         chart,
-        createTrain(dispatch, KEY_VALUES_FOR_SPACE_TIME_CHART, trainSimulations, t)[selectedTrain],
+        createTrain(KEY_VALUES_FOR_SPACE_TIME_CHART, trainSimulations)[selectedTrain],
         KEY_VALUES_FOR_SPACE_TIME_CHART,
         LIST_VALUES_NAME_SPACE_TIME,
         positionValues,
@@ -294,10 +287,11 @@ export default function SpaceTimeChart(props) {
 
 SpaceTimeChart.propTypes = {
   allowancesSettings: PropTypes.any,
-  dispatch: PropTypes.any,
   dispatchUpdateChart: PropTypes.any,
   dispatchUpdateContextMenu: PropTypes.any,
+  dispatchUpdateDepartureArrivalTimes: PropTypes.func,
   dispatchUpdateMustRedraw: PropTypes.func,
+  dispatchUpdateSelectedTrain: PropTypes.func,
   dispatchUpdateTimePositionValues: PropTypes.any,
   initialHeightOfSpaceTimeChart: PropTypes.any,
   inputSelectedTrain: PropTypes.any,
@@ -312,10 +306,11 @@ SpaceTimeChart.propTypes = {
 
 SpaceTimeChart.defaultProps = {
   allowancesSettings: ORSD_GET_SAMPLE_DATA.allowancesSettings,
-  dispatch: () => {},
   dispatchUpdateChart: () => {},
   dispatchUpdateContextMenu: () => {},
+  dispatchUpdateDepartureArrivalTimes: () => {},
   dispatchUpdateMustRedraw: () => {},
+  dispatchUpdateSelectedTrain: () => {},
   dispatchUpdateTimePositionValues: () => {},
   inputSelectedTrain: ORSD_GET_SAMPLE_DATA.selectedTrain,
   initialHeightOfSpaceTimeChart: 400,

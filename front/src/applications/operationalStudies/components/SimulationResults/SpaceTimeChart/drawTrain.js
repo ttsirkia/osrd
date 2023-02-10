@@ -8,17 +8,14 @@ import {
 import drawCurve from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/drawCurve';
 import drawRect from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/drawRect';
 import drawText from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/drawText';
-import {
-  updateContextMenu,
-  updateMustRedraw,
-  updateSelectedTrain,
-  updateDepartureArrivalTimes,
-} from 'reducers/osrdsimulation/actions';
 
 export default function drawTrain(
   allowancesSettings,
   chart,
-  dispatch,
+  dispatchUpdateContextMenu,
+  dispatchUpdateDepartureArrivalTimes,
+  dispatchUpdateMustRedraw,
+  dispatchUpdateSelectedTrain,
   isPathSelected,
   isSelected,
   keyValues,
@@ -62,7 +59,7 @@ export default function drawTrain(
   function debounceUpdateDepartureArrivalTimes(computedDepartureArrivalTimes, interval) {
     clearTimeout(debounceTimeoutId);
     debounceTimeoutId = setTimeout(() => {
-      dispatch(updateDepartureArrivalTimes(computedDepartureArrivalTimes));
+      dispatchUpdateDepartureArrivalTimes(computedDepartureArrivalTimes);
     }, interval);
   }
 
@@ -88,12 +85,12 @@ export default function drawTrain(
     .on('end', () => {
       dragTimeOffset(dragFullOffset, true);
       setDragEnding(true);
-      dispatch(updateMustRedraw(true));
+      dispatchUpdateMustRedraw(true);
     })
     .on('start', () => {
       dragFullOffset = 0;
       setSelectedTrain(trainToDraw.trainNumber);
-      dispatch(updateSelectedTrain(trainToDraw.trainNumber));
+      dispatchUpdateSelectedTrain(trainToDraw.trainNumber);
     })
     .on('drag', (event) => {
       dragFullOffset += rotate ? event.dy : event.dx;
@@ -111,16 +108,14 @@ export default function drawTrain(
     .call(drag)
     .on('contextmenu', (event) => {
       event.preventDefault();
-      dispatch(
-        updateContextMenu({
-          id: trainToDraw.id,
-          xPos: event.layerX,
-          yPos: event.layerY,
-        })
-      );
+      dispatchUpdateContextMenu({
+        id: trainToDraw.id,
+        xPos: event.layerX,
+        yPos: event.layerY,
+      });
       setSelectedTrain(trainToDraw.trainNumber);
-      dispatch(updateSelectedTrain(trainToDraw.trainNumber));
-      dispatch(updateMustRedraw(true));
+      dispatchUpdateSelectedTrain(trainToDraw.trainNumber);
+      dispatchUpdateMustRedraw(true);
     });
 
   // Test direction to avoid displaying block

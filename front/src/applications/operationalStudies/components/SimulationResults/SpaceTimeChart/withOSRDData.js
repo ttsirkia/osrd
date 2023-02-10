@@ -7,6 +7,8 @@ import {
   updateChart,
   updatePositionValues,
   updateTimePositionValues,
+  updateSelectedTrain,
+  updateDepartureArrivalTimes,
 } from 'reducers/osrdsimulation/actions';
 import {
   getAllowancesSettings,
@@ -64,14 +66,23 @@ const withOSRDData = (Component) =>
       dispatch(updateChart(chart));
     };
 
+    const dispatchUpdateSelectedTrain = (_selectedTrain) => {
+      dispatch(updateSelectedTrain(_selectedTrain));
+    };
+
+    const dispatchUpdateDepartureArrivalTimes = (newDepartureArrivalTimes) => {
+      dispatch(updateDepartureArrivalTimes(newDepartureArrivalTimes));
+    };
+
     return (
       <Component
         {...props}
         allowancesSettings={allowancesSettings}
-        dispatch={dispatch}
         dispatchUpdateContextMenu={dispatchUpdateContextMenu}
         dispatchUpdateChart={dispatchUpdateChart}
+        dispatchUpdateDepartureArrivalTimes={dispatchUpdateDepartureArrivalTimes}
         dispatchUpdateMustRedraw={dispatchUpdateMustRedraw}
+        dispatchUpdateSelectedTrain={dispatchUpdateSelectedTrain}
         dispatchUpdatePositionValues={dispatchUpdatePositionValues}
         dispatchUpdateTimePositionValues={dispatchUpdateTimePositionValues}
         inputSelectedTrain={selectedTrain}

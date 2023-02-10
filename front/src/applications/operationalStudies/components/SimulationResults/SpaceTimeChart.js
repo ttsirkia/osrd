@@ -11,8 +11,10 @@ import {
 import {
   updateChart,
   updateContextMenu,
+  updateDepartureArrivalTimes,
   updateMustRedraw,
   updatePositionValues,
+  updateSelectedTrain,
 } from 'reducers/osrdsimulation/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -58,7 +60,6 @@ export default function SpaceTimeChart(props) {
   const simulation = useSelector((state) => state.osrdsimulation.simulation.present);
   const keyValues = ['time', 'position'];
   const [rotate, setRotate] = useState(false);
-  const [isResizeActive, setResizeActive] = useState(false);
   const [chart, setChart] = useState(undefined);
   const [resetChart, setResetChart] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -68,7 +69,7 @@ export default function SpaceTimeChart(props) {
   const [dragOffset, setDragOffset] = useState(0);
   const [dragEnding, setDragEnding] = useState(false);
   // tmpSelectedTrain added for integration, this component should be deprecated soon
-  const [tmpSelectedTrain, setTmpSelectedTrain] = useState(selectedTrain);
+  const [, setTmpSelectedTrain] = useState(selectedTrain);
 
   const handleKey = ({ key }) => {
     if (['+', '-'].includes(key)) {
@@ -143,7 +144,11 @@ export default function SpaceTimeChart(props) {
         drawTrain(
           allowancesSettings,
           chartLocal,
-          dispatch,
+          (_chart) => dispatch(updateChart(_chart)),
+          (_contextMenu) => dispatch(updateContextMenu(_contextMenu)),
+          (_departureArrivalTimes) => dispatch(updateDepartureArrivalTimes(_departureArrivalTimes)),
+          (_mustRedraw) => dispatch(updateMustRedraw(_mustRedraw)),
+          (_selectedTrain) => dispatch(updateSelectedTrain(_selectedTrain)),
           train.id === selectedProjection?.id,
           idx === selectedTrain,
           keyValues,
