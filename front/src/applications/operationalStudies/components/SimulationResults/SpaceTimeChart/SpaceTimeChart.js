@@ -94,6 +94,8 @@ export default function SpaceTimeChart(props) {
 
   /**
    * INPUT UPDATES
+   *
+   * take into account an input update
    */
   useEffect(() => {
     setTrainSimulations(simulation.trains);
@@ -111,30 +113,27 @@ export default function SpaceTimeChart(props) {
   /**
    * ACTIONS HANDLE
    *
-   * Everything should be done by Hoc, has no direct effect on Comp behavior
+   * everything should be done by Hoc, has no direct effect on Comp behavior
    */
-
-  const handleKey = ({ key }) => {
-    if (['+', '-'].includes(key)) {
-      setShowModal(key);
-    }
-  };
-
-  const debounceResize = () => {
-    const height = d3.select(`#container-${CHART_ID}`).node().clientHeight;
-    setHeightOfSpaceTimeChart(height);
-  };
-
   const toggleRotation = () => {
     setChart({ ...chart, x: chart.y, y: chart.x });
     setRotate(!rotate);
   };
 
+  /*
+   * shift the train after a drag and drop
+   */
   useEffect(() => {
     dragShiftTrain(dragOffset);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dragOffset]);
 
+  /*
+   * redraw the trains if
+   * - the simulation trains or the selected train have changed
+   * - the chart is rotated or centered (reset)
+   * - the window or the chart have been resized (heightOfSpaceTimeChart)
+   */
   useEffect(() => {
     if (trainSimulations) {
       const trainsToDraw = createTrain(KEY_VALUES_FOR_SPACE_TIME_CHART, trainSimulations);
@@ -174,7 +173,9 @@ export default function SpaceTimeChart(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetChart, rotate, selectedTrain, trainSimulations, heightOfSpaceTimeChart]);
 
-  // add behaviour on zoom and mousemove/mouseover/wheel on the new chart each time the chart changes
+  /**
+   * add behaviour on zoom and mousemove/mouseover/wheel on the new chart each time the chart changes
+   */
   useEffect(() => {
     if (trainSimulations) {
       isolatedEnableInteractivity(
@@ -198,7 +199,9 @@ export default function SpaceTimeChart(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chart]);
 
-  // coordinates the vertical cursors with other graphs (GEV for instance)
+  /**
+   * coordinates the vertical cursors with other graphs (GEV for instance)
+   */
   useEffect(() => {
     if (trainSimulations) {
       traceVerticalLine(
@@ -215,6 +218,20 @@ export default function SpaceTimeChart(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [positionValues, timePosition]);
 
+  const handleKey = ({ key }) => {
+    if (['+', '-'].includes(key)) {
+      setShowModal(key);
+    }
+  };
+
+  const debounceResize = () => {
+    const height = d3.select(`#container-${CHART_ID}`).node().clientHeight;
+    setHeightOfSpaceTimeChart(height);
+  };
+
+  /**
+   * add behaviour: Type " + " or " - " to update departure time by second
+   */
   useEffect(() => {
     window.addEventListener('keydown', handleKey);
     window.addEventListener('resize', debounceResize);
