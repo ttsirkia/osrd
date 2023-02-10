@@ -80,8 +80,7 @@ export default function SpaceTimeChart(props) {
   const [yPosition, setYPosition] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
 
-  // Everything should be done by Hoc, has no direct effect on Comp behavior
-  const offsetTimeByDragging = useCallback(
+  const dragShiftTrain = useCallback(
     (offset) => {
       if (trainSimulations) {
         const trains = trainSimulations.map((train, ind) =>
@@ -95,7 +94,28 @@ export default function SpaceTimeChart(props) {
     [trainSimulations, selectedTrain, onOffsetTimeByDragging]
   );
 
-  // ACTIONS HANDLE
+  /**
+   * INPUT UPDATES
+   */
+  useEffect(() => {
+    setTrainSimulations(simulation.trains);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [simulation.trains]);
+
+  useEffect(() => {
+    // avoid useless re-render if selectedTrain is already correct
+    if (selectedTrain !== inputSelectedTrain) {
+      setSelectedTrain(inputSelectedTrain);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputSelectedTrain]);
+
+  /**
+   * ACTIONS HANDLE
+   *
+   * Everything should be done by Hoc, has no direct effect on Comp behavior
+   */
+
   const handleKey = ({ key }) => {
     if (['+', '-'].includes(key)) {
       setShowModal(key);
@@ -113,7 +133,7 @@ export default function SpaceTimeChart(props) {
   };
 
   useEffect(() => {
-    offsetTimeByDragging(dragOffset);
+    dragShiftTrain(dragOffset);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dragOffset]);
 
@@ -161,31 +181,9 @@ export default function SpaceTimeChart(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetChart, rotate, selectedTrain, trainSimulations, heightOfSpaceTimeChart]);
 
-  useEffect(() => {
-    // avoid useless re-render if selectedTrain is already correct
-    if (selectedTrain !== inputSelectedTrain) {
-      setSelectedTrain(inputSelectedTrain);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputSelectedTrain]);
-
-  useEffect(() => {
-    // avoid useless re-render if selectedTrain is already correct
-    if (selectedTrain !== inputSelectedTrain) {
-      setSelectedTrain(inputSelectedTrain);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputSelectedTrain]);
-
-  // ADN: trigger a redraw on every simulation change. This is the right pattern.
-  useEffect(() => {
-    setTrainSimulations(simulation.trains);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [simulation.trains]);
-
+  // add behaviour on zoom and mousemove/mouseover/wheel on the new chart each time the chart changes
   useEffect(() => {
     if (trainSimulations) {
-      // add behaviour on zoom and mousemove/mouseover/wheel on the new chart
       isolatedEnableInteractivity(
         chart,
         createTrain(dispatch, KEY_VALUES_FOR_SPACE_TIME_CHART, trainSimulations, t)[selectedTrain],
@@ -222,7 +220,7 @@ export default function SpaceTimeChart(props) {
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [positionValues]);
+  }, [positionValues, timePosition]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKey);
@@ -266,7 +264,7 @@ export default function SpaceTimeChart(props) {
             type={showModal}
             setShowModal={setShowModal}
             trainName={trainSimulations?.[selectedTrain]?.name}
-            offsetTimeByDragging={offsetTimeByDragging}
+            offsetTimeByDragging={dragShiftTrain}
           />
         ) : null}
         <div style={{ height: `100%` }} ref={ref} />

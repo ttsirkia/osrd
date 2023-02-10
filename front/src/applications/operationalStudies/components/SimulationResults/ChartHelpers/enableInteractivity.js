@@ -409,7 +409,7 @@ export const isolatedEnableInteractivity = (
 
   let debounceTimeoutId;
 
-  function debounceUpdateTimePositionValues(timePositionLocal, immediatePositionsValues, interval) {
+  function debounceUpdateTimePositionValues(timePositionLocal, interval) {
     clearTimeout(debounceTimeoutId);
     debounceTimeoutId = setTimeout(() => {
       dispatchUpdateTimePositionValues(timePositionLocal);
@@ -425,7 +425,7 @@ export const isolatedEnableInteractivity = (
           ? chart.y.invert(pointer(event, event.currentTarget)[1])
           : chart.x.invert(pointer(event, event.currentTarget)[0]);
 
-        debounceUpdateTimePositionValues(timePositionLocal, null, 15);
+        debounceUpdateTimePositionValues(timePositionLocal, 15);
         const immediatePositionsValuesForPointer = interpolateOnTime(
           dataSimulation,
           keyValues,
