@@ -143,17 +143,16 @@ export default function SpaceTimeChart(props) {
         drawTrain(
           allowancesSettings,
           chartLocal,
-          train,
           dispatch,
           train.id === selectedProjection?.id,
           idx === selectedTrain,
-          train.isStdcm,
           keyValues,
           rotate,
           setDragEnding,
           setDragOffset,
           setTmpSelectedTrain,
-          simulation
+          simulation.trains,
+          train
         );
       });
       enableInteractivity(

@@ -50,7 +50,6 @@ const drawAllTrains = (
   dispatchUpdateMustRedraw,
   heightOfSpaceTimeChart,
   keyValues,
-  newDataSimulation,
   mustRedraw,
   positionValues,
   ref,
@@ -65,19 +64,19 @@ const drawAllTrains = (
   setSelectedTrain,
   setYPosition,
   setZoomLevel,
-  simulation,
+  simulationTrains,
   simulationIsPlaying,
+  trainsToDraw,
   yPosition,
   zoomLevel,
   // TODO: romve forceRedraw (same as mustRedraw)
   forceRedraw = false
 ) => {
-  const currentDataSimulation = newDataSimulation;
   if (mustRedraw || forceRedraw) {
     const chartLocal = createChart(
       chart,
       CHART_ID,
-      currentDataSimulation,
+      trainsToDraw,
       heightOfSpaceTimeChart,
       keyValues,
       ref,
@@ -90,24 +89,23 @@ const drawAllTrains = (
       dispatchUpdateContextMenu(undefined);
     });
 
-    drawOPs(chartLocal, simulation.trains[selectedTrain], rotate);
+    drawOPs(chartLocal, simulationTrains[selectedTrain], rotate);
 
     drawAxisTitle(chartLocal, rotate);
-    currentDataSimulation.forEach((train, idx) => {
+    trainsToDraw.forEach((train, idx) => {
       drawTrain(
         allowancesSettings,
         chartLocal,
-        train,
         dispatch,
         train.id === selectedProjection?.id,
         idx === selectedTrain,
-        train.isStdcm,
         keyValues,
         rotate,
         setDragEnding,
         setDragOffset,
         setSelectedTrain,
-        simulation
+        simulationTrains,
+        train
       );
     });
     setChart(chartLocal);
