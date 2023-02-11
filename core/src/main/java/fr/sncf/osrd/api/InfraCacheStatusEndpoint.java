@@ -5,7 +5,6 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import fr.sncf.osrd.api.InfraManager.InfraCacheEntry;
-import fr.sncf.osrd.api.InfraManager.InfraStatus;
 import org.takes.Request;
 import org.takes.Response;
 import org.takes.Take;
@@ -40,12 +39,12 @@ public final class InfraCacheStatusEndpoint implements Take {
     }
 
     private static final class SerializedInfraCache {
-        public InfraStatus status;
+        public CacheStatus status;
 
         @Json(name = "last_status")
-        public InfraStatus lastStatus;
+        public CacheStatus lastStatus;
         
-        public SerializedInfraCache(InfraStatus status, InfraStatus lastStatus) {
+        public SerializedInfraCache(CacheStatus status, CacheStatus lastStatus) {
             this.status = status;
             this.lastStatus = lastStatus;
         }

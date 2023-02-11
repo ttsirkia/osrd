@@ -30,14 +30,14 @@ public class InfraManager extends APIClient {
         private static final long serialVersionUID = 4291184310194002894L;
         public static final String osrdErrorType = "infra_loading";
 
-        public final InfraStatus sourceOperation;
+        public final CacheStatus sourceOperation;
 
-        InfraLoadException(String message, InfraStatus sourceOperation, Throwable cause) {
+        InfraLoadException(String message, CacheStatus sourceOperation, Throwable cause) {
             super(message, ErrorCause.USER, cause);
             this.sourceOperation = sourceOperation;
         }
 
-        InfraLoadException(String message, InfraStatus sourceOperation) {
+        InfraLoadException(String message, CacheStatus sourceOperation) {
             super(message, ErrorCause.USER);
             this.sourceOperation = sourceOperation;
         }
@@ -48,57 +48,18 @@ public class InfraManager extends APIClient {
         }
     }
 
-
-    public enum InfraStatus {
-        INITIALIZING(false),
-        DOWNLOADING(false),
-        PARSING_JSON(false),
-        PARSING_INFRA(false),
-        CACHED(true),
-        // errors that are known to be temporary
-        TRANSIENT_ERROR(false),
-        ERROR(true);
-
-        static {
-            INITIALIZING.transitions = new InfraStatus[]{DOWNLOADING};
-            DOWNLOADING.transitions = new InfraStatus[]{PARSING_JSON, ERROR, TRANSIENT_ERROR};
-            PARSING_JSON.transitions = new InfraStatus[]{PARSING_INFRA, ERROR, TRANSIENT_ERROR};
-            PARSING_INFRA.transitions = new InfraStatus[]{CACHED, ERROR, TRANSIENT_ERROR};
-            // if a new version appears
-            CACHED.transitions = new InfraStatus[]{DOWNLOADING};
-            // at the next try
-            TRANSIENT_ERROR.transitions = new InfraStatus[]{DOWNLOADING};
-            // if a new version appears
-            ERROR.transitions = new InfraStatus[]{DOWNLOADING};
-        }
-
-        private InfraStatus(boolean isStable) {
-            this.isStable = isStable;
-        }
-
-        public final boolean isStable;
-        private InfraStatus[] transitions;
-
-        boolean canTransitionTo(InfraStatus newStatus) {
-            for (var status : transitions)
-                if (status == newStatus)
-                    return true;
-            return false;
-        }
-    }
-
     public static final class InfraCacheEntry {
-        public InfraStatus status = InfraStatus.INITIALIZING;
-        public InfraStatus lastStatus = null;
+        public CacheStatus status = CacheStatus.INITIALIZING;
+        public CacheStatus lastStatus = null;
         public Throwable lastError = null;
         public SignalingInfra infra = null;
         public String expectedVersion = null;
 
-        void transitionTo(InfraStatus newStatus) {
+        void transitionTo(CacheStatus newStatus) {
             transitionTo(newStatus, null);
         }
 
-        void transitionTo(InfraStatus newStatus, Throwable error) {
+        void transitionTo(CacheStatus newStatus, Throwable error) {
             assert status.canTransitionTo(newStatus) : String.format("cannot switch from %s to %s", status, newStatus);
             this.lastStatus = this.status;
             this.lastError = error;
@@ -126,7 +87,7 @@ public class InfraManager extends APIClient {
         try {
             // use the client to send the request
             logger.info("starting to download {}", request.url());
-            cacheEntry.transitionTo(InfraStatus.DOWNLOADING);
+            cacheEntry.transitionTo(CacheStatus.DOWNLOADING);
 
             RJSInfra rjsInfra;
             try (var response = httpClient.newCall(request).execute()) {
@@ -135,7 +96,7 @@ public class InfraManager extends APIClient {
 
                 // Parse the response
                 logger.info("parsing the JSON of {}", request.url());
-                cacheEntry.transitionTo(InfraStatus.PARSING_JSON);
+                cacheEntry.transitionTo(CacheStatus.PARSING_JSON);
 
                 rjsInfra = RJSInfra.adapter.fromJson(response.body().source());
             }
@@ -145,7 +106,7 @@ public class InfraManager extends APIClient {
 
             // Parse railjson into a proper infra
             logger.info("parsing the infra of {}", request.url());
-            cacheEntry.transitionTo(InfraStatus.PARSING_INFRA);
+            cacheEntry.transitionTo(CacheStatus.PARSING_MODEL);
             var infra = SignalingInfraBuilder.fromRJSInfra(
                     rjsInfra,
                     Set.of(new BAL3(diagnosticRecorder)),
@@ -156,13 +117,13 @@ public class InfraManager extends APIClient {
             logger.info("successfully cached {}", request.url());
             cacheEntry.infra = infra;
             cacheEntry.expectedVersion = expectedVersion;
-            cacheEntry.transitionTo(InfraStatus.CACHED);
+            cacheEntry.transitionTo(CacheStatus.CACHED);
             return infra;
         } catch (IOException | UnexpectedHttpResponse | VirtualMachineError e) {
-            cacheEntry.transitionTo(InfraStatus.TRANSIENT_ERROR, e);
+            cacheEntry.transitionTo(CacheStatus.TRANSIENT_ERROR, e);
             throw new InfraLoadException("soft error while loading new infra", cacheEntry.lastStatus, e);
         } catch (Throwable e) {
-            cacheEntry.transitionTo(InfraStatus.ERROR, e);
+            cacheEntry.transitionTo(CacheStatus.ERROR, e);
             throw new InfraLoadException("hard error while loading new infra", cacheEntry.lastStatus, e);
         }
     }
@@ -188,9 +149,9 @@ public class InfraManager extends APIClient {
                     return downloadInfra(cacheEntry, infraId, expectedVersion, diagnosticRecorder);
 
                 // otherwise, wait for the infra to reach a stable state
-                if (cacheEntry.status == InfraStatus.CACHED)
+                if (cacheEntry.status == CacheStatus.CACHED)
                     return cacheEntry.infra;
-                if (cacheEntry.status == InfraStatus.ERROR)
+                if (cacheEntry.status == CacheStatus.ERROR)
                     throw new InfraLoadException("cached exception", cacheEntry.lastStatus, cacheEntry.lastError);
                 throw new InfraLoadException("invalid status after waitUntilStable", cacheEntry.status);
             }
