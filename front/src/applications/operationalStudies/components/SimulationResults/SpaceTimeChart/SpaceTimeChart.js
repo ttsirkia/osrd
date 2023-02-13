@@ -289,6 +289,7 @@ export default function SpaceTimeChart(props) {
           type="button"
           className="btn-rounded btn-rounded-white box-shadow btn-rotate mr-5"
           onClick={() => {
+            setRotate(false);
             setResetChart(true);
           }}
         >
