@@ -65,8 +65,6 @@ export default function SpaceTimeChart(props) {
   );
   const [chart, setChart] = useState(undefined);
   const [dragOffset, setDragOffset] = useState(0);
-  // TODO: remove setDragEnding without creating a new error in the console
-  const [, setDragEnding] = useState(false);
   const [heightOfSpaceTimeChart, setHeightOfSpaceTimeChart] = useState(
     initialHeightOfSpaceTimeChart
   );
@@ -156,7 +154,6 @@ export default function SpaceTimeChart(props) {
         selectedProjection,
         selectedTrain,
         setChart,
-        setDragEnding,
         setDragOffset,
         setResetChart,
         setSelectedTrain,

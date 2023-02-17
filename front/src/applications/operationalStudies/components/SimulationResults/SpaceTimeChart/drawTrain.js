@@ -20,7 +20,6 @@ export default function drawTrain(
   isSelected,
   keyValues,
   rotate,
-  setDragEnding,
   setDragOffset,
   setSelectedTrain,
   simulationTrains,
@@ -84,7 +83,6 @@ export default function drawTrain(
     .container((d) => d) // the component is dragged from its initial position
     .on('end', () => {
       dragTimeOffset(dragFullOffset, true);
-      setDragEnding(true);
       dispatchUpdateMustRedraw(true);
     })
     .on('start', () => {
