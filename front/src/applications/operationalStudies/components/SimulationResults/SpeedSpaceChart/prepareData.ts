@@ -16,6 +16,7 @@ interface gevPreparedata {
   modesAndProfiles: ModesAndProfiles[];
 }
 
+// called with keyValues = ['position', 'speed']
 function prepareData(
   simulation: SimulationSnapshot,
   selectedTrain: number,

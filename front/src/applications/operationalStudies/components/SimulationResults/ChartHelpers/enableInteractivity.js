@@ -370,6 +370,7 @@ const enableInteractivity = (
   drawGuideLines(chart);
 };
 
+// ['time', 'position']
 export const isolatedEnableInteractivity = (
   chart,
   dataSimulation,

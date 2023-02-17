@@ -9,7 +9,7 @@ import {
 import defineChart from 'applications/operationalStudies/components/SimulationResults/ChartHelpers/defineChart';
 
 // This is only used by SpaceTimeChart for now.
-export default function createChart<T extends number>(
+export default function createChart<T extends number | Date>(
   chart: Chart,
   chartID: string,
   dataSimulation: SimulationTrain[],
@@ -19,16 +19,15 @@ export default function createChart<T extends number>(
   reset: boolean,
   rotate: boolean
 ): Chart {
-  type valueTypes<T extends number | Date> = T[];
   d3select(`#${chartID}`).remove();
 
-  const xValues: valueTypes<T> = dataSimulation
+  const xValues: T[] = dataSimulation
     .map((train) =>
       train.headPosition.map((section) =>
         section.map((position) => (keyValues[0] === 'time' ? position.time : position.position))
       )
     )
-    .flat(Infinity) as valueTypes<T>;
+    .flat(Infinity) as T[];
 
   function getMax(pos: 'tailPosition' | 'headPosition') {
     return d3.max(
