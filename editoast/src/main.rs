@@ -28,6 +28,7 @@ use diesel::{Connection, PgConnection};
 use infra::Infra;
 use infra_cache::InfraCache;
 use map::MapLayers;
+use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
@@ -86,6 +87,26 @@ async fn runserver(
     // Setup shared states
     let infra_caches = Data::new(CHashMap::<i64, InfraCache>::default());
 
+    // Setup sentry
+    let _guard = match (
+        args.sentry_dsn,
+        args.sentry_env,
+        env::var("OSRD_GIT_DESCRIBE").ok(),
+    ) {
+        (Some(sentry_dsn), Some(sentry_env), Some(release)) => Some(sentry::init((
+            sentry_dsn,
+            sentry::ClientOptions {
+                release: Some(release.into()),
+                environment: Some(sentry_env.into()),
+                ..Default::default()
+            },
+        ))),
+        _ => {
+            println!("Missing SENTRY_DSN or SENTRY_ENV or OSRD_GIT_DESCRIBE env variables to sent event to sentry.");
+            None
+        }
+    };
+
     let server = HttpServer::new(move || {
         // Build CORS
         let cors = Cors::default()
@@ -94,6 +115,7 @@ async fn runserver(
             .allow_any_header();
 
         App::new()
+            .wrap(sentry_actix::Sentry::new())
             .wrap(cors)
             .wrap(NormalizePath::trim())
             .wrap(Logger::default())
