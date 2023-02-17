@@ -51,8 +51,6 @@ const drawAllTrains = (
   dispatchUpdateSelectedTrain,
   heightOfSpaceTimeChart,
   keyValues,
-  mustRedraw,
-  positionValues,
   ref,
   reset,
   rotate,
@@ -60,61 +58,51 @@ const drawAllTrains = (
   selectedTrain,
   setChart,
   setDragOffset,
-  setResetChart,
   setSelectedTrain,
-  setYPosition,
-  setZoomLevel,
   simulationTrains,
   simulationIsPlaying,
-  trainsToDraw,
-  yPosition,
-  zoomLevel,
-  // TODO: romve forceRedraw (same as mustRedraw)
-  forceRedraw = false
+  trainsToDraw
 ) => {
-  if (mustRedraw || forceRedraw) {
-    const chartLocal = createChart(
-      chart,
-      CHART_ID,
-      trainsToDraw,
-      heightOfSpaceTimeChart,
+  const chartLocal = createChart(
+    chart,
+    CHART_ID,
+    trainsToDraw,
+    heightOfSpaceTimeChart,
+    keyValues,
+    ref,
+    reset,
+    rotate
+  );
+
+  // a quoi sert ContextMenu ? Pourquoi undefined ici ?
+  chartLocal.svg.on('click', () => {
+    dispatchUpdateContextMenu(undefined);
+  });
+
+  drawOPs(chartLocal, simulationTrains[selectedTrain], rotate);
+
+  drawAxisTitle(chartLocal, rotate);
+  trainsToDraw.forEach((train, idx) => {
+    drawTrain(
+      allowancesSettings,
+      chartLocal,
+      dispatchUpdateContextMenu,
+      dispatchUpdateDepartureArrivalTimes,
+      dispatchUpdateMustRedraw,
+      dispatchUpdateSelectedTrain,
+      train.id === selectedProjection?.id,
+      idx === selectedTrain,
       keyValues,
-      ref,
-      reset,
-      rotate
+      rotate,
+      setDragOffset,
+      setSelectedTrain,
+      simulationTrains,
+      train
     );
-
-    // a quoi sert ContextMenu ? Pourquoi undefined ici ?
-    chartLocal.svg.on('click', () => {
-      dispatchUpdateContextMenu(undefined);
-    });
-
-    drawOPs(chartLocal, simulationTrains[selectedTrain], rotate);
-
-    drawAxisTitle(chartLocal, rotate);
-    trainsToDraw.forEach((train, idx) => {
-      drawTrain(
-        allowancesSettings,
-        chartLocal,
-        dispatchUpdateContextMenu,
-        dispatchUpdateDepartureArrivalTimes,
-        dispatchUpdateMustRedraw,
-        dispatchUpdateSelectedTrain,
-        train.id === selectedProjection?.id,
-        idx === selectedTrain,
-        keyValues,
-        rotate,
-        setDragOffset,
-        setSelectedTrain,
-        simulationTrains,
-        train
-      );
-    });
-    setChart(chartLocal);
-    dispatchUpdateChart({ ...chartLocal, rotate });
-    dispatchUpdateMustRedraw(false);
-    setResetChart(false);
-  }
+  });
+  setChart(chartLocal);
+  dispatchUpdateChart({ ...chartLocal, rotate });
+  dispatchUpdateMustRedraw(false);
 };
 
 export { drawOPs, drawAllTrains };

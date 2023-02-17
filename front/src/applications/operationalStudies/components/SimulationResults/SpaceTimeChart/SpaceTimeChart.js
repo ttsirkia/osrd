@@ -146,8 +146,6 @@ export default function SpaceTimeChart(props) {
         dispatchUpdateSelectedTrain,
         heightOfSpaceTimeChart,
         KEY_VALUES_FOR_SPACE_TIME_CHART,
-        false,
-        positionValues,
         ref,
         resetChart,
         rotate,
@@ -155,17 +153,12 @@ export default function SpaceTimeChart(props) {
         selectedTrain,
         setChart,
         setDragOffset,
-        setResetChart,
         setSelectedTrain,
-        setYPosition,
-        setZoomLevel,
         trainSimulations,
         simulationIsPlaying,
-        trainsToDraw,
-        yPosition,
-        zoomLevel,
-        true
+        trainsToDraw
       );
+      setResetChart(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetChart, rotate, selectedTrain, trainSimulations, heightOfSpaceTimeChart]);
@@ -180,13 +173,8 @@ export default function SpaceTimeChart(props) {
         createTrain(KEY_VALUES_FOR_SPACE_TIME_CHART, trainSimulations)[selectedTrain],
         KEY_VALUES_FOR_SPACE_TIME_CHART,
         LIST_VALUES_NAME_SPACE_TIME,
-        positionValues,
         rotate,
         setChart,
-        setYPosition,
-        setZoomLevel,
-        yPosition,
-        zoomLevel,
         simulationIsPlaying,
         dispatchUpdateContextMenu,
         dispatchUpdateMustRedraw,
