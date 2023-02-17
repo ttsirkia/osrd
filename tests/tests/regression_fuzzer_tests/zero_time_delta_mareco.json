@@ -1,0 +1,93 @@
+{
+  "error_type": "SCHEDULE",
+  "code": 500,
+  "error": "{\"type\":\"core:assert_error\",\"assert_message\":\"zero timeDeltas\",\"cause\":\"INTERNAL\",\"message\":\"zero timeDeltas\",\"stack_trace\":[\"EnvelopePart.java:175\",\"EnvelopePart.java:642\",\"EnvelopePart.java:529\",\"Envelope.java:276\",\"Envelope.java:255\",\"Envelope.java:233\",\"AbstractAllowanceWithRanges.java:474\",\"AbstractAllowanceWithRanges.java:329\",\"AbstractAllowanceWithRanges.java:279\",\"AbstractAllowanceWithRanges.java:254\",\"AbstractAllowanceWithRanges.java:184\",\"AbstractAllowanceWithRanges.java:126\",\"StandaloneSim.java:108\",\"StandaloneSim.java:67\",\"StandaloneSimulationEndpoint.java:101\",\"FkRegex.java:153\",\"FkRegex.java:217\",\"FkChain.java:72\",\"TkFork.java:98\",\"TkFallback.java:84\",\"TkFallback.java:66\",\"TkWrap.java:58\",\"TkSlf4j.java:110\",\"BkBasic.java:123\",\"BkBasic.java:99\",\"BkSafe.java:46\",\"BkWrap.java:51\",\"BkParallel.java:81\",\"ThreadPoolExecutor.java:1136\",\"ThreadPoolExecutor.java:635\",\"Thread.java:833\"],\"trace\":[]}",
+  "infra_name": "small_infra",
+  "path_payload": {
+    "infra": 3,
+    "name": "foo",
+    "steps": [
+      {
+        "duration": 368.9215029692129,
+        "waypoints": [
+          {
+            "track_section": "TA1",
+            "offset": 396.96123856180384
+          }
+        ]
+      },
+      {
+        "duration": 721.8039400763546,
+        "waypoints": [
+          {
+            "track_section": "TA1",
+            "offset": 939.0170822383502
+          }
+        ]
+      },
+      {
+        "duration": 0,
+        "waypoints": [
+          {
+            "track_section": "TC3",
+            "offset": 974.5869919583199
+          }
+        ]
+      },
+      {
+        "duration": 230.8407016230175,
+        "waypoints": [
+          {
+            "track_section": "TD1",
+            "offset": 15440.70948094157
+          }
+        ]
+      },
+      {
+        "duration": 361.1540922112484,
+        "waypoints": [
+          {
+            "track_section": "TD3",
+            "offset": 396.13722300631457
+          }
+        ]
+      },
+      {
+        "duration": 1,
+        "waypoints": [
+          {
+            "track_section": "TG5",
+            "offset": 1599.5865757920017
+          }
+        ]
+      }
+    ]
+  },
+  "schedule_payload": {
+    "timetable": 14,
+    "path": 2065,
+    "schedules": [
+      {
+        "train_name": "foo",
+        "labels": [],
+        "departure_time": 52075,
+        "allowances": [
+          {
+            "allowance_type": "engineering",
+            "begin_position": 379.8336281169222,
+            "end_position": 39240.450778866405,
+            "value": {
+              "value_type": "time",
+              "seconds": 115.24008504535553
+            },
+            "capacity_speed_limit": 2.2996661742279665,
+            "distribution": "MARECO"
+          }
+        ],
+        "initial_speed": 0,
+        "rolling_stock": 61,
+        "speed_limit_category": "foo"
+      }
+    ]
+  }
+}
