@@ -7,4 +7,4 @@ declare global {
 
 type Env = Record<string, string | undefined>;
 
-export const env: Env = { ...process.env, ...window.env };
+export const env: Env = { ...window.env };
