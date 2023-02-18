@@ -37,6 +37,7 @@
     "@turf/nearest-point": "^6.3.0",
     "@turf/nearest-point-on-line": "^6.3.0",
     "@turf/transform-translate": "^6.5.0",
+    "@vitejs/plugin-react-swc": "^3.1.0",
     "are-we-there-yet": "^4.0.0",
     "axios": "^0.27.2",
     "babel-loader": "8.1.0",
@@ -99,6 +100,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
+    "@import-meta-env/unplugin": "^0.4.4",
     "@playwright/test": "^1.29.2",
     "@storybook/addon-actions": "^6.5.15",
     "@storybook/addon-essentials": "^6.5.15",
@@ -126,7 +128,6 @@
     "@types/tether": "^1.4.6",
     "@types/uuid": "^8.3.4",
     "@vitejs/plugin-react": "^3.1.0",
-    "@import-meta-env/unplugin": "^0.4.4",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-only-warn": "^1.0.3",
