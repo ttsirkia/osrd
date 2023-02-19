@@ -59,7 +59,6 @@ export class PlaywrightHomePage {
       this.getTranslations('map'),
       this.getTranslations('editor'),
       this.getTranslations('stdcm'),
-      this.getTranslations('opendataimport'),
     ]);
   }
 

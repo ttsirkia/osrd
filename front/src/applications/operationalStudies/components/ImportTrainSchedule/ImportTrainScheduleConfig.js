@@ -6,7 +6,7 @@ import InputSNCF from 'common/BootstrapSNCF/InputSNCF';
 import {
   MemoStationSelector,
   formatStation,
-} from 'applications/operationalStudies/components/ImportTrainSchedule/StationSelector';
+} from 'applications/operationalStudies/components/ImportTrainSchedule/ImportTrainScheduleStationSelector';
 import { setFailure } from 'reducers/main';
 import { useDispatch } from 'react-redux';
 
@@ -15,9 +15,9 @@ function dateOfToday() {
   return date.toJSON().substring(0, 10);
 }
 
-export default function OpenDataImportConfig(props) {
+export default function ImportTrainScheduleConfig(props) {
   const { setConfig } = props;
-  const { t } = useTranslation(['opendata']);
+  const { t } = useTranslation(['operationalStudies/importTrainSchedule']);
   const [from, setFrom] = useState();
   const [fromSearchString, setFromSearchString] = useState('');
   const [to, setTo] = useState();
@@ -180,6 +180,6 @@ export default function OpenDataImportConfig(props) {
   );
 }
 
-OpenDataImportConfig.propTypes = {
+ImportTrainScheduleConfig.propTypes = {
   setConfig: PropTypes.func.isRequired,
 };

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import OpenDataImportConfig from 'applications/operationalStudies/components/ImportTrainSchedule/OpenDataImportConfig';
-import OpenDataTrainsList from 'applications/operationalStudies/components/ImportTrainSchedule/OpenDataTrainsList';
+import ImportTrainScheduleConfig from 'applications/operationalStudies/components/ImportTrainSchedule/ImportTrainScheduleConfig';
+import ImportTrainScheduleTrainsList from 'applications/operationalStudies/components/ImportTrainSchedule/ImportTrainScheduleTrainsList';
 import { get } from 'common/requests';
 import Loader from 'common/Loader';
 
 const ROLLING_STOCK_URL = '/light_rolling_stock/';
 
-export default function OpenDataImport() {
+export default function ImportTrainSchedule() {
   const [config, setConfig] = useState();
   const [rollingStockDB, setRollingStockDB] = useState();
 
@@ -27,11 +27,9 @@ export default function OpenDataImport() {
   }, []);
 
   return rollingStockDB ? (
-    <main className="osrd-config-mastcontainer mastcontainer opendata-import">
-      <div className="p-3">
-        <OpenDataImportConfig setConfig={setConfig} />
-        <OpenDataTrainsList config={config} rollingStockDB={rollingStockDB} />
-      </div>
+    <main className="import-train-schedule">
+      <ImportTrainScheduleConfig setConfig={setConfig} />
+      <ImportTrainScheduleTrainsList config={config} rollingStockDB={rollingStockDB} />
     </main>
   ) : (
     <Loader />

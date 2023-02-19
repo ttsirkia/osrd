@@ -5,9 +5,9 @@ import ModalFooterSNCF from 'common/BootstrapSNCF/ModalSNCF/ModalFooterSNCF';
 import { useNavigate } from 'react-router-dom';
 import { ModalContext } from 'common/BootstrapSNCF/ModalSNCF/ModalProvider';
 
-export default function OpenDataImportModalFooter(props) {
+export default function ImportTrainScheduleModalFooter(props) {
   const { status } = props;
-  const { t } = useTranslation('translation', 'opendata');
+  const { t } = useTranslation('translation', 'operationalStudies/importTrainSchedule');
   const { closeModal } = useContext(ModalContext);
   const navigate = useNavigate();
   return (
@@ -23,7 +23,7 @@ export default function OpenDataImportModalFooter(props) {
                 navigate('/osrd/simulation');
               }}
             >
-              {t('opendata:goToSimulation')}
+              {t('operationalStudies/importTrainSchedule:goToSimulation')}
             </button>
             <button
               type="button"
@@ -33,7 +33,7 @@ export default function OpenDataImportModalFooter(props) {
                 navigate('/stdcm');
               }}
             >
-              {t('opendata:goToSTDCM')}
+              {t('operationalStudies/importTrainSchedule:goToSTDCM')}
             </button>
           </div>
         ) : null}
@@ -45,6 +45,6 @@ export default function OpenDataImportModalFooter(props) {
   );
 }
 
-OpenDataImportModalFooter.propTypes = {
+ImportTrainScheduleModalFooter.propTypes = {
   status: PropTypes.object.isRequired,
 };
