@@ -67,7 +67,7 @@ export default function ImportTrainScheduleConfig(props) {
 
   return (
     <div className="row">
-      <div className="col-lg-4">
+      <div className="col-lg-6">
         <div className="osrd-config-item mb-2">
           <div className="osrd-config-item-container osrd-config-item-from">
             <h2>{t('from')}</h2>
@@ -91,7 +91,7 @@ export default function ImportTrainScheduleConfig(props) {
           </div>
         </div>
       </div>
-      <div className="col-lg-4">
+      <div className="col-lg-6">
         <div className="osrd-config-item mb-2">
           <div className="osrd-config-item-container osrd-config-item-to">
             <h2>{t('to')}</h2>
@@ -115,7 +115,10 @@ export default function ImportTrainScheduleConfig(props) {
           </div>
         </div>
       </div>
-      <div className="col-lg-4">
+      <div className="col-lg-6">
+        <RollingStockSelector />
+      </div>
+      <div className="col-lg-6">
         <div className="osrd-config-item mb-2">
           <div className="osrd-config-item-container osrd-config-item-datetime">
             <h2>{t('datetime')}</h2>
@@ -172,9 +175,6 @@ export default function ImportTrainScheduleConfig(props) {
             </div>
           </div>
         </div>
-      </div>
-      <div className="col-lg-4">
-        <RollingStockSelector />
       </div>
     </div>
   );

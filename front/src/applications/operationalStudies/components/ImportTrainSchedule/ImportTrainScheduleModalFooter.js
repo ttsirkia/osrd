@@ -20,7 +20,6 @@ export default function ImportTrainScheduleModalFooter(props) {
               className="btn text-wrap btn-success flex-grow-1 mr-1"
               onClick={() => {
                 closeModal();
-                navigate('/osrd/simulation');
               }}
             >
               {t('operationalStudies/importTrainSchedule:goToSimulation')}

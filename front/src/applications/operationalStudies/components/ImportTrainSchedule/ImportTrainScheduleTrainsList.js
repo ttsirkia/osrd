@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import Loader from 'common/Loader';
 import { get } from 'axios';
-import TrainDetail from 'applications/operationalStudies/components/ImportTrainSchedule/ImportTrainScheduleTrainDetail';
+import ImportTrainScheduleTrainDetail from 'applications/operationalStudies/components/ImportTrainSchedule/ImportTrainScheduleTrainDetail';
 import ImportTrainScheduleModal from 'applications/operationalStudies/components/ImportTrainSchedule/ImportTrainScheduleModal';
 import { GoRocket } from 'react-icons/go';
 import { ModalContext } from 'common/BootstrapSNCF/ModalSNCF/ModalProvider';
 import { keyBy } from 'lodash';
 import rollingstockOpenData2OSRD from 'applications/operationalStudies/components/ImportTrainSchedule/rollingstock_opendata2osrd.json';
+import nextId from 'react-id-generator';
 import { GRAOU_URL } from './consts';
 
 function LoadingIfSearching(props) {
@@ -81,10 +82,10 @@ export default function ImportTrainScheduleTrainsList(props) {
         </div>
         <div className="import-train-schedule-trainlist-results">
           {trainsList.map((train, idx) => (
-            <TrainDetail
+            <ImportTrainScheduleTrainDetail
               trainData={train}
               idx={idx}
-              key={rollingstockOpenData2OSRD[train.type_em]}
+              key={nextId()}
               rollingStock={rollingStockDict[rollingstockOpenData2OSRD[train.type_em]]}
             />
           ))}

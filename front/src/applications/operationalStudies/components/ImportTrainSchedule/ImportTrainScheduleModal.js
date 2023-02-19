@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { getRollingStockID, getInfraID, getTimetableID } from 'reducers/osrdconf/selectors';
 import generatePathfindingPayload from 'applications/operationalStudies/components/ImportTrainSchedule/generatePathfindingPayload';
 import generateTrainSchedulesPayload from 'applications/operationalStudies/components/ImportTrainSchedule/generateTrainSchedulesPayload';
+import getTimetable from 'applications/operationalStudies/components/Scenario/getTimetable';
 import { post } from 'common/requests';
 import { scheduleURL } from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
 import {
@@ -198,6 +199,7 @@ export default function ImportTrainScheduleModal(props) {
   async function launchTrainSchedules(params) {
     try {
       await post(scheduleURL, params, {});
+      getTimetable();
       return `${t(
         'operationalStudies/importTrainSchedule:status.calculatingTrainScheduleComplete'
       )} (${params.path})`;
