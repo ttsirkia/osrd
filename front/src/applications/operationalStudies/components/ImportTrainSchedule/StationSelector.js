@@ -6,7 +6,7 @@ import { useDebounce } from 'utils/helpers';
 import { useTranslation } from 'react-i18next';
 import Loader from 'common/Loader';
 import nextId from 'react-id-generator';
-import { GRAOU_URL } from '../consts';
+import { GRAOU_URL } from './consts';
 
 export function formatStation(stationData) {
   return (

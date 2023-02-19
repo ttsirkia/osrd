@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import Loader from 'common/Loader';
 import { get } from 'axios';
-import TrainDetail from 'applications/opendata/components/TrainDetail';
-import OpenDataImportModal from 'applications/opendata/views/OpenDataImportModal';
+import TrainDetail from 'applications/operationalStudies/components/ImportTrainSchedule/TrainDetail';
+import OpenDataImportModal from 'applications/operationalStudies/components/ImportTrainSchedule/OpenDataImportModal';
 import { GoRocket } from 'react-icons/go';
 import { ModalContext } from 'common/BootstrapSNCF/ModalSNCF/ModalProvider';
 import { keyBy } from 'lodash';
-import { GRAOU_URL } from '../consts';
-import rollingstockOpenData2OSRD from '../components/rollingstock_opendata2osrd.json';
+import rollingstockOpenData2OSRD from 'applications/operationalStudies/components/ImportTrainSchedule/rollingstock_opendata2osrd.json';
+import { GRAOU_URL } from './consts';
 
 function LoadingIfSearching(props) {
   const { t } = useTranslation(['opendata']);
@@ -24,7 +24,7 @@ function LoadingIfSearching(props) {
 export default function OpenDataTrainsList(props) {
   const { t } = useTranslation(['opendata']);
   const { openModal } = useContext(ModalContext);
-  const { config, rollingStockDB, setMustUpdateTimetable } = props;
+  const { config, rollingStockDB } = props;
   const [trainsList, setTrainList] = useState();
   const [isSearching, setIsSearching] = useState(false);
 
@@ -70,13 +70,7 @@ export default function OpenDataTrainsList(props) {
             className="btn btn-primary btn-sm ml-auto"
             type="button"
             onClick={() =>
-              openModal(
-                <OpenDataImportModal
-                  rollingStockDB={rollingStockDB}
-                  trains={trainsList}
-                  setMustUpdateTimetable={setMustUpdateTimetable}
-                />
-              )
+              openModal(<OpenDataImportModal rollingStockDB={rollingStockDB} trains={trainsList} />)
             }
           >
             <GoRocket />
@@ -115,5 +109,4 @@ LoadingIfSearching.propTypes = {
 OpenDataTrainsList.propTypes = {
   config: PropTypes.object,
   rollingStockDB: PropTypes.array.isRequired,
-  setMustUpdateTimetable: PropTypes.func.isRequired,
 };

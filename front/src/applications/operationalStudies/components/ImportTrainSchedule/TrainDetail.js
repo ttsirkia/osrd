@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import nextId from 'react-id-generator';
-import { seconds2hhmmss } from 'applications/opendata/components/OpenDataHelpers';
+import { seconds2hhmmss } from 'applications/operationalStudies/components/ImportTrainSchedule/OpenDataHelpers';
 import RollingStock2Img from 'common/RollingStockSelector/RollingStock2Img';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 

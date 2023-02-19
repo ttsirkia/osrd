@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import RollingStockSelector from 'common/RollingStockSelector/RollingStockSelector';
 import PropTypes from 'prop-types';
 import InputSNCF from 'common/BootstrapSNCF/InputSNCF';
 import {
   MemoStationSelector,
   formatStation,
-} from 'applications/opendata/components/StationSelector';
+} from 'applications/operationalStudies/components/ImportTrainSchedule/StationSelector';
 import { setFailure } from 'reducers/main';
 import { useDispatch } from 'react-redux';
 
@@ -171,6 +172,9 @@ export default function OpenDataImportConfig(props) {
             </div>
           </div>
         </div>
+      </div>
+      <div className="col-lg-4">
+        <RollingStockSelector />
       </div>
     </div>
   );

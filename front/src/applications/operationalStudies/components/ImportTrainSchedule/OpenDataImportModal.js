@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import ModalBodySNCF from 'common/BootstrapSNCF/ModalSNCF/ModalBodySNCF';
-import Map from 'applications/opendata/components/Map';
+import Map from 'applications/operationalStudies/components/ImportTrainSchedule/Map';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { getRollingStockID, getInfraID, getTimetableID } from 'reducers/osrdconf/selectors';
-import generatePathfindingPayload from 'applications/opendata/components/generatePathfindingPayload';
-import generateTrainSchedulesPayload from 'applications/opendata/components/generateTrainSchedulesPayload';
+import generatePathfindingPayload from 'applications/operationalStudies/components/ImportTrainSchedule/generatePathfindingPayload';
+import generateTrainSchedulesPayload from 'applications/operationalStudies/components/ImportTrainSchedule/generateTrainSchedulesPayload';
 import { post } from 'common/requests';
 import { scheduleURL } from 'applications/operationalStudies/components/SimulationResults/simulationResultsConsts';
-import { initialViewport, initialStatus, itineraryURI } from 'applications/opendata/consts';
+import {
+  initialViewport,
+  initialStatus,
+  itineraryURI,
+} from 'applications/operationalStudies/components/ImportTrainSchedule//consts';
+import { refactorUniquePaths } from 'applications/operationalStudies/components/ImportTrainSchedule/OpenDataHelpers';
 import OpenDataImportModalFooter from './OpenDataImportModalFooter';
-import { refactorUniquePaths } from '../components/OpenDataHelpers';
 
 /* METHOD
  *
@@ -24,7 +28,7 @@ import { refactorUniquePaths } from '../components/OpenDataHelpers';
  */
 
 export default function OpenDataImportModal(props) {
-  const { rollingStockDB, setMustUpdateTimetable, trains } = props;
+  const { rollingStockDB, trains } = props;
   const { t } = useTranslation('translation', 'opendata');
   const infraID = useSelector(getInfraID);
   const rollingStockID = useSelector(getRollingStockID);
@@ -209,7 +213,6 @@ export default function OpenDataImportModal(props) {
     }
     Promise.all(promisesList).then(() => {
       setStatus({ ...status, trainSchedulesDone: true });
-      setMustUpdateTimetable(true);
       setWhatIAmDoingNow(t('opendata:status.calculatingTrainScheduleCompleteAll'));
     });
   }
@@ -322,5 +325,4 @@ OpenDataImportModal.defaultProps = {
 OpenDataImportModal.propTypes = {
   trains: PropTypes.array.isRequired,
   rollingStockDB: PropTypes.array,
-  setMustUpdateTimetable: PropTypes.func.isRequired,
 };
